@@ -1,12 +1,14 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Hero from '../sections/Hero.jsx';
+import TrustMarquee from '../sections/TrustMarquee.jsx';
 import CategoryGrid from '../sections/CategoryGrid.jsx';
 import ProductRail from '../components/ProductRail.jsx';
 import PromoBanner from '../sections/PromoBanner.jsx';
 import WhyChooseUs from '../sections/WhyChooseUs.jsx';
 import Features from '../sections/Features.jsx';
 import Testimonials from '../sections/Testimonials.jsx';
+import BrandMarquee from '../sections/BrandMarquee.jsx';
 import Newsletter from '../sections/Newsletter.jsx';
 import { PRODUCTS } from '../data/products.js';
 
@@ -37,6 +39,7 @@ export default function Home() {
   return (
     <>
       <Hero />
+      <TrustMarquee />
       <CategoryGrid />
       <ProductRail
         eyebrow="Curated"
@@ -61,6 +64,7 @@ export default function Home() {
       />
       <Features />
       <Testimonials />
+      <BrandMarquee />
       <Newsletter />
     </>
   );

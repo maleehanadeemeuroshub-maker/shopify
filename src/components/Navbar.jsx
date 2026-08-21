@@ -43,6 +43,7 @@ const SHOP_MEGA = [
 
 export default function Navbar() {
   const [solid, setSolid] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -53,8 +54,30 @@ export default function Navbar() {
   const { count: wishCount } = useWishlist();
   const navigate = useNavigate();
 
+  // Kept in a ref (not the scroll effect's dependency array) so the scroll
+  // listener is only ever attached once, instead of tearing down/re-attaching
+  // on every menu/search open-close.
+  const overlaysOpenRef = useRef(false);
   useEffect(() => {
-    const onScroll = () => setSolid(window.scrollY > 40);
+    overlaysOpenRef.current = menuOpen || mobileNavOpen || searchOpen;
+    if (overlaysOpenRef.current) setHidden(false);
+  }, [menuOpen, mobileNavOpen, searchOpen]);
+
+  useEffect(() => {
+    const lastY = { current: window.scrollY };
+    const onScroll = () => {
+      const y = window.scrollY;
+      setSolid(y > 40);
+
+      if (overlaysOpenRef.current || y < 120) {
+        setHidden(false);
+      } else if (y > lastY.current + 6) {
+        setHidden(true); // scrolling down — get out of the way
+      } else if (y < lastY.current - 6) {
+        setHidden(false); // scrolling up — come back
+      }
+      lastY.current = y;
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -81,11 +104,21 @@ export default function Navbar() {
 
   return (
     <>
+      {/* One element, one `transform`. This is position:fixed, so animating
+          `y` on a *wrapper* around it would be wrong: framer-motion leaves a
+          persistent inline transform behind, and any non-"none" transform on
+          an ANCESTOR of a fixed element changes its containing block — it
+          would stop tracking the viewport. Entrance (opacity, once on mount)
+          and scroll hide/show (y, ongoing) are independent motion values
+          here so each can carry its own transition speed. */}
       <motion.header
         className={`navbar ${solid ? 'navbar--solid' : ''}`}
-        initial={{ y: -30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, y: hidden ? '-100%' : 0 }}
+        transition={{
+          opacity: { duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.15 },
+          y: { duration: 0.35, ease: 'easeInOut' },
+        }}
       >
         <div className="navbar__inner" ref={navRef}>
           <Link className="navbar__logo" to="/">
@@ -116,6 +149,9 @@ export default function Navbar() {
             </Link>
             <Link className="navitem navitem--sale" to="/shop?category=Sale">
               Sale
+            </Link>
+            <Link className="navitem" to="/why-genzwears">
+              Why GENZ
             </Link>
           </nav>
 
@@ -212,6 +248,9 @@ export default function Navbar() {
                 </Link>
                 <Link to="/shop?category=Sale" onClick={() => setMobileNavOpen(false)} className="mobile-nav__sale">
                   Sale
+                </Link>
+                <Link to="/why-genzwears" onClick={() => setMobileNavOpen(false)}>
+                  Why GENZ
                 </Link>
                 <Link to={user ? '/account' : '#'} onClick={(e) => {
                   setMobileNavOpen(false);

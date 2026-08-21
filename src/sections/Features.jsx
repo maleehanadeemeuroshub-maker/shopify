@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Sparkles, ArrowRight } from 'lucide-react';
+import BorderBeamPanel from '../components/ui/border-beam-panel.tsx';
 import { useModal } from '../context/ModalContext.jsx';
 import './Features.css';
 
@@ -40,14 +41,16 @@ export default function Features() {
               transition={{ duration: 0.7, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{ y: -6 }}
             >
-              <div className="fcard__img" style={{ backgroundImage: `url(${c.image})` }} />
-              <div className="fcard__text">
-                <h3>{c.title}</h3>
-                <p>{c.copy}</p>
-                <button className="fcard__link" onClick={() => openAuth('signup')} type="button">
-                  Learn more <ArrowRight size={13} />
-                </button>
-              </div>
+              <BorderBeamPanel className="fcard__beam p-0 border-0 bg-transparent" radius={16} thickness={1.6} beams={2} glow>
+                <div className="fcard__img" style={{ backgroundImage: `url(${c.image})` }} />
+                <div className="fcard__text">
+                  <h3>{c.title}</h3>
+                  <p>{c.copy}</p>
+                  <button className="fcard__link" onClick={() => openAuth('signup')} type="button">
+                    Learn more <ArrowRight size={13} />
+                  </button>
+                </div>
+              </BorderBeamPanel>
             </motion.div>
           ))}
         </div>

@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
 import CursorGlow from './components/CursorGlow.jsx';
+import CosmicDust from './components/CosmicDust.jsx';
 import AuthModal from './components/AuthModal.jsx';
 import CartDrawer from './components/CartDrawer.jsx';
 import QuickViewModal from './components/QuickViewModal.jsx';
@@ -46,6 +47,7 @@ export default function App() {
           <CartProvider>
             <WishlistProvider>
               <QuickViewProvider>
+                <CosmicDust />
                 <div className="grain" aria-hidden="true" />
                 <CursorGlow />
                 <ScrollToTop />

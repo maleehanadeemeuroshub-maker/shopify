@@ -20,11 +20,9 @@
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--panel);
-  border: 1px solid var(--panel-border);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: box-shadow 0.3s ease;
 }
 .fcard:hover {
-  border-color: rgba(149, 255, 138, 0.28);
   box-shadow: 0 20px 50px -24px rgba(0, 0, 0, 0.6);
 }
 
