@@ -29,12 +29,20 @@
 
 html {
   scroll-behavior: smooth;
+  /* Sits below everything, including z-index:-1 elements like CosmicDust —
+     this is the root stacking context's own background, painted before any
+     descendant. It's the dark fallback if WebGL fails or before it loads. */
   background: var(--bg);
 }
 
 body {
   font-family: var(--font-body);
-  background: var(--bg);
+  /* Deliberately no background here: body is a normal, non-positioned
+     in-flow box, and in-flow content paints ABOVE negative z-index
+     descendants — an opaque body background would sit right on top of (and
+     fully hide) a position:fixed; z-index:-1 canvas like CosmicDust,
+     regardless of what any page section's own background is set to. */
+  background: transparent;
   color: var(--ink);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;

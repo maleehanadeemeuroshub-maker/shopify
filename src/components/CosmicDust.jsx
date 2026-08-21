@@ -14,8 +14,8 @@ import './CosmicDust.css';
 //      composer wiring; pinning the exact version avoids any behavior drift
 //      from Three's ongoing color-management/renderer changes.
 // This is intentionally a second, isolated Three.js runtime — it never
-// imports or shares state with the app's own `three` (used by Scene3D /
-// ScrollScene3D on the Hero and Why-GENZ pages).
+// imports or shares state with the app's own `three` (used by Scene3D on
+// the Hero page).
 // ─────────────────────────────────────────────────────────────────────────
 
 const THREE_VERSION = '0.143.0';
