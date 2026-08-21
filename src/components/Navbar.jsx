@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import MagneticButton from './MagneticButton.jsx';
+import { useModal } from '../context/ModalContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 import './Navbar.css';
 
 const MEGA_COLUMNS = [
@@ -23,6 +26,11 @@ export default function Navbar() {
   const [solid, setSolid] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const navRef = useRef(null);
+  const { openAuth } = useModal();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const goToFeatures = () => navigate('/#features');
 
   useEffect(() => {
     const onScroll = () => setSolid(window.scrollY > 40);
@@ -46,7 +54,7 @@ export default function Navbar() {
       transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
     >
       <div className="navbar__inner" ref={navRef}>
-        <a className="navbar__logo" href="#top">
+        <Link className="navbar__logo" to="/">
           <span className="navbar__mark">
             <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path fill="#ffffff" d="M100 12C140 12 180 45 180 92C180 130 155 152 128 168C128 168 130 140 118 118C118 118 148 108 148 78C148 50 126 30 100 30L100 12Z" />
@@ -56,28 +64,48 @@ export default function Navbar() {
             </svg>
           </span>
           GENZ-WEARS
-        </a>
+        </Link>
 
         <nav className="navbar__links">
-          <div className="navitem">
+          <Link className="navitem" to="/why-genzwears">
             Why GENZ-WEARS <ChevronDown size={12} strokeWidth={2} />
-          </div>
+          </Link>
           <button
             className={`navitem ${menuOpen ? 'navitem--open' : ''}`}
             onClick={() => setMenuOpen((v) => !v)}
+            type="button"
           >
             Products <ChevronDown size={12} strokeWidth={2} />
           </button>
-          <div className="navitem">Pricing</div>
-          <div className="navitem">Enterprise</div>
+          <Link className="navitem" to="/pricing">
+            Pricing
+          </Link>
+          <Link className="navitem" to="/enterprise">
+            Enterprise
+          </Link>
           <div className="navbar__badge">
             <span className="navbar__badge-dot" /> Spring &apos;26 Edition
           </div>
         </nav>
 
         <div className="navbar__right">
-          <a className="navbar__login">Log in</a>
-          <MagneticButton variant="solid">Start for free</MagneticButton>
+          {user ? (
+            <>
+              <span className="navbar__user">Hi, {user.name.split(' ')[0]}</span>
+              <MagneticButton variant="outline" onClick={logout}>
+                Log out
+              </MagneticButton>
+            </>
+          ) : (
+            <>
+              <button className="navbar__login" onClick={() => openAuth('login')} type="button">
+                Log in
+              </button>
+              <MagneticButton variant="solid" onClick={() => openAuth('signup')}>
+                Start for free
+              </MagneticButton>
+            </>
+          )}
         </div>
 
         <AnimatePresence>
@@ -95,7 +123,13 @@ export default function Navbar() {
                     <h4>{col.title}</h4>
                     <ul>
                       {col.items.map((item) => (
-                        <li key={item}>
+                        <li
+                          key={item}
+                          onClick={() => {
+                            setMenuOpen(false);
+                            goToFeatures();
+                          }}
+                        >
                           <span className="mega-col__ic" />
                           {item}
                         </li>
@@ -107,7 +141,9 @@ export default function Navbar() {
                   <h4>NON-STOP INNOVATION</h4>
                   <div className="innovation-panel">
                     <div className="innovation-panel__thumb" />
-                    <a href="#top">GENZ-WEARS Editions &rarr;</a>
+                    <Link to="/why-genzwears" onClick={() => setMenuOpen(false)}>
+                      GENZ-WEARS Editions &rarr;
+                    </Link>
                     <p>150+ updates to GENZ-WEARS, twice a year.</p>
                   </div>
                 </div>

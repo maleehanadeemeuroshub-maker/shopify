@@ -1,8 +1,10 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import BackgroundVideo from '../components/BackgroundVideo.jsx';
 import MagneticButton from '../components/MagneticButton.jsx';
+import { useModal } from '../context/ModalContext.jsx';
 import './Hero.css';
 
 const Scene3D = lazy(() => import('../components/Scene3D.jsx'));
@@ -13,6 +15,7 @@ const HEADLINES = [
   ['Be the next', 'sold-out drop'],
   ['Be the next', 'runway favourite'],
   ['Be the next', "city's best dressed"],
+  ['Be the next', 'name on everyone’s list'],
 ];
 
 const STATS = [
@@ -32,6 +35,8 @@ export default function Hero() {
   const headlineRef = useRef(null);
 
   const handleIndexChange = useCallback((i) => setSlide(i), []);
+  const { openAuth } = useModal();
+  const navigate = useNavigate();
 
   // entrance timeline
   useEffect(() => {
@@ -100,10 +105,10 @@ export default function Hero() {
         </p>
 
         <div className="hero__ctas" ref={ctasRef}>
-          <MagneticButton variant="solid">
+          <MagneticButton variant="solid" onClick={() => openAuth('signup')}>
             Start for free <ArrowRight size={16} />
           </MagneticButton>
-          <MagneticButton variant="outline">
+          <MagneticButton variant="outline" onClick={() => navigate('/why-genzwears')}>
             <span className="play-ic">&#9658;</span> Why we build GENZ-WEARS
           </MagneticButton>
         </div>

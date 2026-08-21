@@ -1,0 +1,32 @@
+.pricing-page {
+  background: #02020e;
+  padding-top: 150px;
+}
+
+.pricing-page__intro {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto;
+  padding-bottom: 8px;
+}
+
+.pricing-page__intro h1 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4.2vw, 54px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 16px 0 16px;
+  color: #f3f5f2;
+}
+
+.pricing-page__intro p {
+  font-size: 16px;
+  color: rgba(208, 210, 236, 0.6);
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .pricing-page {
+    padding-top: 120px;
+  }
+}

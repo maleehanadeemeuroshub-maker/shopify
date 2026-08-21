@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Sparkles, ArrowRight } from 'lucide-react';
+import { useModal } from '../context/ModalContext.jsx';
 import './Features.css';
 
 const CARDS = [
@@ -23,8 +24,10 @@ const CARDS = [
 const viewport = { once: true, amount: 0.3 };
 
 export default function Features() {
+  const { openAuth } = useModal();
+
   return (
-    <section className="features">
+    <section className="features" id="features">
       <div className="container features__grid">
         <div className="features__cards">
           {CARDS.map((c, i) => (
@@ -41,9 +44,9 @@ export default function Features() {
               <div className="fcard__text">
                 <h3>{c.title}</h3>
                 <p>{c.copy}</p>
-                <span className="fcard__link">
+                <button className="fcard__link" onClick={() => openAuth('signup')} type="button">
                   Learn more <ArrowRight size={13} />
-                </span>
+                </button>
               </div>
             </motion.div>
           ))}

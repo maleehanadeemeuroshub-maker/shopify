@@ -1,5 +1,9 @@
 .footer {
   position: relative;
+  /* z-index above 0 is required here: pages that use KineticGrid render a
+     position:fixed canvas, which paints above normal in-flow content
+     regardless of DOM order unless this element is promoted too. */
+  z-index: 1;
   overflow: hidden;
   padding: 100px 0 40px;
   background: #060807;
