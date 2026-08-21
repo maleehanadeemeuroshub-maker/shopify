@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2, MapPin, Package, Truck } from 'lucide-react';
 import ProductImage from '../components/ProductImage.jsx';
 import MagneticButton from '../components/MagneticButton.jsx';
+import OrderProgress from '../components/OrderProgress.jsx';
 import { formatPrice } from '../utils/format.js';
 import './OrderConfirmation.css';
 
@@ -56,6 +57,10 @@ export default function OrderConfirmation() {
           order number is <strong>{order.orderNumber}</strong>.
         </p>
       </motion.div>
+
+      <div className="confirmation__tracking">
+        <OrderProgress status={order.status ?? 'confirmed'} />
+      </div>
 
       <div className="confirmation__layout">
         <div className="confirmation__items">

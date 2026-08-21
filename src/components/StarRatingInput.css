@@ -1,0 +1,17 @@
+.star-rating-input {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.star-rating-input button {
+  color: var(--ink-faint);
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.star-rating-input button:hover {
+  transform: scale(1.08);
+}
+
+.star-rating-input button.is-filled {
+  color: var(--green);
+}

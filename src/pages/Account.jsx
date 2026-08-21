@@ -4,6 +4,7 @@ import { Heart, LogOut, MapPin, Package, Truck, User, XCircle } from 'lucide-rea
 import ProductImage from '../components/ProductImage.jsx';
 import ProductCard from '../components/ProductCard.jsx';
 import MagneticButton from '../components/MagneticButton.jsx';
+import OrderProgress from '../components/OrderProgress.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useWishlist } from '../context/WishlistContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
@@ -154,6 +155,9 @@ export default function Account() {
                       </span>
                       <span className="account__order-total">{formatPrice(lastOrder.totals.total)}</span>
                     </div>
+                  </div>
+                  <div className="account__order-tracking">
+                    <OrderProgress status={lastOrder.status ?? 'confirmed'} />
                   </div>
                   <div className="account__order-items">
                     {lastOrder.items.map((line) => (

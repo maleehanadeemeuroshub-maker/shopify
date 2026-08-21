@@ -16,8 +16,29 @@ function generateOrderNumber() {
   return `GW-${rand}`;
 }
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const NAME_PATTERN = /^[A-Za-z][A-Za-z .'-]*$/;
+const PHONE_PATTERN = /^[0-9()+\- ]{7,20}$/;
+
+// Numeric-only countries get digit-filtered input as the user types;
+// others (Canada/UK) allow letters since their postcodes are alphanumeric.
+const POSTAL_RULES = {
+  'United States': { pattern: /^\d{5}(-\d{4})?$/, hint: '5-digit ZIP code, e.g. 10001', numeric: true },
+  Canada: { pattern: /^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/, hint: 'Format: A1A 1A1', numeric: false },
+  'United Kingdom': { pattern: /^[A-Za-z]{1,2}\d[A-Za-z\d]? ?\d[A-Za-z]{2}$/, hint: 'Enter a valid UK postcode', numeric: false },
+  Australia: { pattern: /^\d{4}$/, hint: '4-digit postcode, e.g. 2000', numeric: true },
+  Germany: { pattern: /^\d{5}$/, hint: '5-digit postcode, e.g. 10115', numeric: true },
+};
+
+const sanitizeName = (v) => v.replace(/[^A-Za-z .'-]/g, '');
+const sanitizePhone = (v) => v.replace(/[^0-9()+\- ]/g, '');
+const sanitizePostal = (v, country) => {
+  const rule = POSTAL_RULES[country];
+  return rule?.numeric ? v.replace(/[^0-9-]/g, '') : v.replace(/[^A-Za-z0-9 ]/g, '');
+};
+
 export default function Checkout() {
-  const { items, clearCart } = useCart();
+  const { items, clearCart, promoCode } = useCart();
   const { user } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -38,25 +59,34 @@ export default function Checkout() {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
-  const shippingCost = delivery === 'express' ? EXPRESS_SHIPPING : items.length ? computeCartTotals(items).shipping : 0;
-  const totals = useMemo(() => computeCartTotals(items, shippingCost), [items, shippingCost]);
+  const shippingCost =
+    delivery === 'express' ? EXPRESS_SHIPPING : items.length ? computeCartTotals(items, null, promoCode).shipping : 0;
+  const totals = useMemo(() => computeCartTotals(items, shippingCost, promoCode), [items, shippingCost, promoCode]);
 
   if (items.length === 0) {
     return <Navigate to="/shop" replace />;
   }
 
-  const update = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+  const update = (field, sanitize) => (e) => {
+    const raw = e.target.value;
+    const value = sanitize ? sanitize(raw, form.country) : raw;
+    setForm((f) => ({ ...f, [field]: value }));
+  };
+
+  const postalRule = POSTAL_RULES[form.country];
 
   const validate = () => {
     const next = {};
-    if (!form.email.includes('@')) next.email = 'Enter a valid email address.';
-    if (!form.firstName.trim()) next.firstName = 'Required.';
-    if (!form.lastName.trim()) next.lastName = 'Required.';
-    if (!form.phone.trim()) next.phone = 'Required.';
+    if (!EMAIL_PATTERN.test(form.email.trim())) next.email = 'Enter a valid email address.';
+    if (!NAME_PATTERN.test(form.firstName.trim())) next.firstName = form.firstName.trim() ? 'Letters only.' : 'Required.';
+    if (!NAME_PATTERN.test(form.lastName.trim())) next.lastName = form.lastName.trim() ? 'Letters only.' : 'Required.';
+    if (!PHONE_PATTERN.test(form.phone.trim()))
+      next.phone = form.phone.trim() ? 'Enter a valid phone number.' : 'Required.';
     if (!form.address.trim()) next.address = 'Required.';
-    if (!form.city.trim()) next.city = 'Required.';
-    if (!form.state.trim()) next.state = 'Required.';
-    if (!form.postalCode.trim()) next.postalCode = 'Required.';
+    if (!NAME_PATTERN.test(form.city.trim())) next.city = form.city.trim() ? 'Letters only.' : 'Required.';
+    if (!NAME_PATTERN.test(form.state.trim())) next.state = form.state.trim() ? 'Letters only.' : 'Required.';
+    if (!postalRule.pattern.test(form.postalCode.trim()))
+      next.postalCode = form.postalCode.trim() ? `Invalid format — ${postalRule.hint}` : 'Required.';
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -121,17 +151,24 @@ export default function Checkout() {
               </label>
               <label className="checkout__field">
                 <span>First Name</span>
-                <input type="text" value={form.firstName} onChange={update('firstName')} />
+                <input type="text" value={form.firstName} onChange={update('firstName', sanitizeName)} />
                 {errors.firstName && <em>{errors.firstName}</em>}
               </label>
               <label className="checkout__field">
                 <span>Last Name</span>
-                <input type="text" value={form.lastName} onChange={update('lastName')} />
+                <input type="text" value={form.lastName} onChange={update('lastName', sanitizeName)} />
                 {errors.lastName && <em>{errors.lastName}</em>}
               </label>
               <label className="checkout__field checkout__field--full">
                 <span>Phone</span>
-                <input type="tel" value={form.phone} onChange={update('phone')} placeholder="(555) 000-0000" />
+                <input
+                  type="tel"
+                  inputMode="tel"
+                  value={form.phone}
+                  onChange={update('phone', sanitizePhone)}
+                  placeholder="(555) 000-0000"
+                  maxLength={20}
+                />
                 {errors.phone && <em>{errors.phone}</em>}
               </label>
             </div>
@@ -147,22 +184,35 @@ export default function Checkout() {
               </label>
               <label className="checkout__field">
                 <span>City</span>
-                <input type="text" value={form.city} onChange={update('city')} />
+                <input type="text" value={form.city} onChange={update('city', sanitizeName)} />
                 {errors.city && <em>{errors.city}</em>}
               </label>
               <label className="checkout__field">
                 <span>Province / State</span>
-                <input type="text" value={form.state} onChange={update('state')} />
+                <input type="text" value={form.state} onChange={update('state', sanitizeName)} />
                 {errors.state && <em>{errors.state}</em>}
               </label>
               <label className="checkout__field">
                 <span>Postal Code</span>
-                <input type="text" value={form.postalCode} onChange={update('postalCode')} />
+                <input
+                  type="text"
+                  inputMode={postalRule.numeric ? 'numeric' : 'text'}
+                  value={form.postalCode}
+                  onChange={update('postalCode', sanitizePostal)}
+                  placeholder={postalRule.hint}
+                  maxLength={10}
+                />
                 {errors.postalCode && <em>{errors.postalCode}</em>}
               </label>
               <label className="checkout__field">
                 <span>Country</span>
-                <select value={form.country} onChange={update('country')}>
+                <select
+                  value={form.country}
+                  onChange={(e) => {
+                    const country = e.target.value;
+                    setForm((f) => ({ ...f, country, postalCode: sanitizePostal(f.postalCode, country) }));
+                  }}
+                >
                   <option>United States</option>
                   <option>Canada</option>
                   <option>United Kingdom</option>
@@ -184,7 +234,7 @@ export default function Checkout() {
                   <span>4–6 business days</span>
                 </div>
                 <span className="checkout__option-price">
-                  {computeCartTotals(items).shipping === 0 ? 'Free' : formatPrice(STANDARD_SHIPPING)}
+                  {computeCartTotals(items, null, promoCode).shipping === 0 ? 'Free' : formatPrice(STANDARD_SHIPPING)}
                 </span>
               </label>
               <label className={`checkout__option ${delivery === 'express' ? 'is-active' : ''}`}>
@@ -282,6 +332,12 @@ export default function Checkout() {
             <span>Shipping</span>
             <span>{totals.shipping === 0 ? 'Free' : formatPrice(totals.shipping)}</span>
           </div>
+          {totals.promo && totals.promoDiscount > 0 && (
+            <div className="checkout__row checkout__row--discount">
+              <span>Promo ({promoCode})</span>
+              <span>-{formatPrice(totals.promoDiscount)}</span>
+            </div>
+          )}
           <div className="checkout__row checkout__row--total">
             <span>Total</span>
             <span>{formatPrice(totals.total)}</span>

@@ -188,6 +188,12 @@
   cursor: not-allowed;
 }
 
+.account__order-tracking {
+  padding: 18px 4px 22px;
+  border-bottom: 1px solid var(--panel-border);
+  margin-bottom: 18px;
+}
+
 .account__order-items {
   display: flex;
   flex-direction: column;

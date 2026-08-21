@@ -8,11 +8,14 @@ import MagneticButton from '../components/MagneticButton.jsx';
 import Accordion from '../components/Accordion.jsx';
 import Modal from '../components/Modal.jsx';
 import ProductRail from '../components/ProductRail.jsx';
+import ReviewsSection from '../components/ReviewsSection.jsx';
 import { ColorSelector, SizeSelector, QuantitySelector } from '../components/ProductSelectors.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { useWishlist } from '../context/WishlistContext.jsx';
+import { useProductReviews } from '../hooks/useProductReviews.js';
 import { getProductById, getRelatedProducts } from '../data/products.js';
 import { formatPrice, discountPercent } from '../utils/format.js';
+import { recordView, getRecentlyViewedIds } from '../utils/recentlyViewed.js';
 import './ProductDetail.css';
 
 export default function ProductDetail() {
@@ -30,6 +33,7 @@ export default function ProductDetail() {
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [zoomStyle, setZoomStyle] = useState({});
   const [zooming, setZooming] = useState(false);
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
   const mediaRef = useRef(null);
 
   useEffect(() => {
@@ -38,11 +42,16 @@ export default function ProductDetail() {
       setColor(product.colors[0]);
       setSize(product.sizes[0]);
       setQty(1);
+
+      const ids = getRecentlyViewedIds(product.id);
+      setRecentlyViewed(ids.map(getProductById).filter(Boolean).slice(0, 8));
+      recordView(product.id);
     }
     window.scrollTo(0, 0);
   }, [product]);
 
   const related = useMemo(() => (product ? getRelatedProducts(product) : []), [product]);
+  const { average: reviewAverage, count: reviewCount } = useProductReviews(product);
 
   if (!product) {
     return (
@@ -178,9 +187,9 @@ export default function ProductDetail() {
           <span className="pdp-info__category">{product.category}</span>
           <h1>{product.name}</h1>
 
-          <div className="pdp-info__rating">
-            <StarRating rating={product.rating} reviews={product.reviews} showValue />
-          </div>
+          <a href="#reviews" className="pdp-info__rating">
+            <StarRating rating={reviewAverage} reviews={reviewCount} showValue />
+          </a>
 
           <div className="pdp-info__price">
             {product.salePrice ? (
@@ -247,6 +256,8 @@ export default function ProductDetail() {
         </div>
       </div>
 
+      <ReviewsSection product={product} />
+
       {related.length > 0 && (
         <ProductRail
           eyebrow="You may also like"
@@ -254,6 +265,10 @@ export default function ProductDetail() {
           products={related}
           viewAllHref={`/shop?category=${encodeURIComponent(product.category)}`}
         />
+      )}
+
+      {recentlyViewed.length > 0 && (
+        <ProductRail eyebrow="Your history" title="Recently Viewed" products={recentlyViewed} />
       )}
 
       <Modal open={sizeGuideOpen} onClose={() => setSizeGuideOpen(false)} labelledBy="size-guide-title">

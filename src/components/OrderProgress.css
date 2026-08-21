@@ -1,0 +1,106 @@
+.order-progress {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.order-progress__step {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.order-progress__line {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--panel-border);
+  z-index: 0;
+}
+
+.order-progress__step.is-done .order-progress__line {
+  background: var(--green);
+}
+
+.order-progress__dot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--panel-border);
+  color: var(--ink-faint);
+  font-size: 12px;
+  font-weight: 700;
+  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.order-progress__step.is-done .order-progress__dot {
+  background: var(--green);
+  border-color: var(--green);
+  color: #0a0d0b;
+}
+
+.order-progress__step.is-current .order-progress__dot {
+  border-color: var(--green);
+  color: var(--green);
+  box-shadow: 0 0 0 4px rgba(149, 255, 138, 0.14);
+}
+
+.order-progress__label {
+  margin-top: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-faint);
+}
+
+.order-progress__step.is-done .order-progress__label,
+.order-progress__step.is-current .order-progress__label {
+  color: var(--ink);
+}
+
+.order-progress--cancelled {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 90, 90, 0.08);
+  border: 1px solid rgba(255, 90, 90, 0.2);
+  color: #ff9d9d;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.order-progress__cancelled-icon {
+  display: flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 90, 90, 0.15);
+  flex-shrink: 0;
+}
+
+@media (max-width: 560px) {
+  .order-progress__label {
+    font-size: 10px;
+  }
+  .order-progress__dot {
+    width: 26px;
+    height: 26px;
+  }
+  .order-progress__line {
+    top: 13px;
+  }
+}

@@ -39,6 +39,14 @@
   color: var(--ink);
 }
 
+.confirmation__tracking {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  padding: 24px 26px;
+  margin-bottom: 24px;
+}
+
 .confirmation__layout {
   display: grid;
   grid-template-columns: 1fr 320px;

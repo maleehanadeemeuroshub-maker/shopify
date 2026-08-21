@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Minus, Plus, ShoppingBag, X } from 'lucide-react';
+import { ArrowRight, Check, Minus, Plus, ShoppingBag, Tag, X } from 'lucide-react';
 import ProductImage from '../components/ProductImage.jsx';
 import MagneticButton from '../components/MagneticButton.jsx';
 import { useCart } from '../context/CartContext.jsx';
@@ -9,8 +10,26 @@ import { formatPrice } from '../utils/format.js';
 import './Cart.css';
 
 export default function Cart() {
-  const { items, removeItem, updateQty } = useCart();
-  const { listSubtotal, discount, shipping, total, discountedSubtotal } = computeCartTotals(items);
+  const { items, removeItem, updateQty, promoCode, applyPromoCode, removePromoCode } = useCart();
+  const { listSubtotal, discount, shipping, total, discountedSubtotal, promo, promoDiscount } = computeCartTotals(
+    items,
+    null,
+    promoCode
+  );
+  const [promoInput, setPromoInput] = useState('');
+  const [promoError, setPromoError] = useState('');
+
+  const handleApplyPromo = (e) => {
+    e.preventDefault();
+    if (!promoInput.trim()) return;
+    const result = applyPromoCode(promoInput);
+    if (result.ok) {
+      setPromoError('');
+      setPromoInput('');
+    } else {
+      setPromoError(result.message);
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -94,10 +113,46 @@ export default function Cart() {
               Add {formatPrice(FREE_SHIPPING_THRESHOLD - discountedSubtotal)} more for free shipping.
             </p>
           )}
+
+          {promo && promoDiscount > 0 && (
+            <div className="cart-page__row cart-page__row--discount">
+              <span>Promo ({promoCode})</span>
+              <span>-{formatPrice(promoDiscount)}</span>
+            </div>
+          )}
+
           <div className="cart-page__row cart-page__row--total">
             <span>Estimated Total</span>
             <span>{formatPrice(total)}</span>
           </div>
+
+          {promo ? (
+            <div className="cart-page__promo cart-page__promo--applied">
+              <span>
+                <Check size={13} /> <strong>{promoCode}</strong> applied — {promo.label}
+              </span>
+              <button type="button" onClick={removePromoCode}>
+                Remove
+              </button>
+            </div>
+          ) : (
+            <form className="cart-page__promo" onSubmit={handleApplyPromo}>
+              <div className="cart-page__promo-input">
+                <Tag size={14} />
+                <input
+                  type="text"
+                  placeholder="Promo code"
+                  value={promoInput}
+                  onChange={(e) => {
+                    setPromoInput(e.target.value);
+                    setPromoError('');
+                  }}
+                />
+              </div>
+              <button type="submit">Apply</button>
+            </form>
+          )}
+          {promoError && <p className="cart-page__promo-error">{promoError}</p>}
 
           <MagneticButton as={Link} to="/checkout" variant="solid" className="cart-page__checkout">
             Checkout <ArrowRight size={16} />

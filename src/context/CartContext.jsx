@@ -1,10 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { emailApi } from '../lib/api.js';
+import { getPromoCode } from '../utils/cartMath.js';
 import { useAuth } from './AuthContext.jsx';
 import { useToast } from './ToastContext.jsx';
 
 const CartContext = createContext(null);
 const STORAGE_KEY = 'genzwears_cart';
+const PROMO_STORAGE_KEY = 'genzwears_promo';
 
 // Shortened for demo purposes — a real store would wait hours, not minutes,
 // before treating a cart as abandoned.
@@ -26,12 +28,18 @@ function readStoredCart() {
 export function CartProvider({ children }) {
   const [items, setItems] = useState(readStoredCart);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [promoCode, setPromoCode] = useState(() => localStorage.getItem(PROMO_STORAGE_KEY) || null);
   const { user } = useAuth();
   const { showToast } = useToast();
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items]);
+
+  useEffect(() => {
+    if (promoCode) localStorage.setItem(PROMO_STORAGE_KEY, promoCode);
+    else localStorage.removeItem(PROMO_STORAGE_KEY);
+  }, [promoCode]);
 
   const { subtotal, itemCount } = useMemo(() => {
     return items.reduce(
@@ -127,14 +135,54 @@ export function CartProvider({ children }) {
     );
   }, []);
 
-  const clearCart = useCallback(() => setItems([]), []);
+  const clearCart = useCallback(() => {
+    setItems([]);
+    setPromoCode(null);
+  }, []);
 
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
+  const applyPromoCode = useCallback((code) => {
+    const promo = getPromoCode(code);
+    if (!promo) return { ok: false, message: 'That code is not valid.' };
+    setPromoCode(code.trim().toUpperCase());
+    return { ok: true, message: promo.label };
+  }, []);
+
+  const removePromoCode = useCallback(() => setPromoCode(null), []);
+
   const value = useMemo(
-    () => ({ items, addItem, removeItem, updateQty, clearCart, subtotal, itemCount, drawerOpen, openDrawer, closeDrawer }),
-    [items, addItem, removeItem, updateQty, clearCart, subtotal, itemCount, drawerOpen, openDrawer, closeDrawer]
+    () => ({
+      items,
+      addItem,
+      removeItem,
+      updateQty,
+      clearCart,
+      subtotal,
+      itemCount,
+      drawerOpen,
+      openDrawer,
+      closeDrawer,
+      promoCode,
+      applyPromoCode,
+      removePromoCode,
+    }),
+    [
+      items,
+      addItem,
+      removeItem,
+      updateQty,
+      clearCart,
+      subtotal,
+      itemCount,
+      drawerOpen,
+      openDrawer,
+      closeDrawer,
+      promoCode,
+      applyPromoCode,
+      removePromoCode,
+    ]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
