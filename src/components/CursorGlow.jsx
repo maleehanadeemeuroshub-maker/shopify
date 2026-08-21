@@ -13,8 +13,8 @@ export default function CursorGlow() {
       pos.current.y = e.clientY;
     };
     const tick = () => {
-      current.current.x += (pos.current.x - current.current.x) * 0.06;
-      current.current.y += (pos.current.y - current.current.y) * 0.06;
+      current.current.x += (pos.current.x - current.current.x) * 0.09;
+      current.current.y += (pos.current.y - current.current.y) * 0.09;
       if (glowRef.current) {
         glowRef.current.style.transform = `translate3d(${current.current.x}px, ${current.current.y}px, 0)`;
       }
