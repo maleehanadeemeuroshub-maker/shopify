@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIHJ4PSIxOCIgZmlsbD0iIzBiMGYwZCIvPgo8cGF0aCBkPSJNMjIgNzIgTDIyIDMwIEwzNiAzMCBMNTAgNTQgTDY0IDMwIEw3OCAzMCBMNzggNzIgTDY2IDcyIEw2NiA0NiBMNTIgNzAgTDQ4IDcwIEwzNCA0NiBMMzQgNzIgWiIgZmlsbD0iI2ZmZmZmZiIvPgo8L3N2Zz4=">
 <title>GENZ-WEARS — Be the next store they line up for</title>
 <style>
   :root{
@@ -134,15 +134,16 @@
   }
   .hero-bg{
     position:absolute; inset:0; z-index:0;
+    background:#000;
   }
   .hero-bg video{
-    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center center;
     opacity:0; transition:opacity 1.1s ease;
   }
   .hero-bg video.active{opacity:1;}
   .hero-bg:after{
     content:''; position:absolute; inset:0;
-    background:linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.42) 42%, rgba(0,0,0,0.18) 70%, rgba(0,0,0,0.35) 100%);
+    background:linear-gradient(90deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.22) 42%, rgba(0,0,0,0.08) 70%, rgba(0,0,0,0.18) 100%);
     z-index:1;
   }
   .hero-content{
@@ -368,8 +369,11 @@
 <section class="hero">
   <div class="hero-bg" id="heroBg">
   <div class="hero-bg" id="heroBg">
-    <video class="active" data-idx="0" autoplay muted loop playsinline src="https://videos.pexels.com/video-files/6175084/6175084-uhd_2560_1440_25fps.mp4"></video>
-    <video data-idx="1" autoplay muted loop playsinline src="https://videos.pexels.com/video-files/6169976/6169976-uhd_2560_1440_25fps.mp4"></video>
+    <video class="active" data-idx="0" autoplay muted loop playsinline src="hero-1.mp4"></video>
+    <video data-idx="1" autoplay muted loop playsinline src="hero-2.mp4"></video>
+    <video data-idx="2" autoplay muted loop playsinline src="hero-3.mp4"></video>
+    <video data-idx="3" autoplay muted loop playsinline src="hero-4.mp4"></video>
+    <video data-idx="4" autoplay muted loop playsinline src="hero-5.mp4"></video>
   </div>
   <div class="hero-content">
     <h1><span class="cycle" id="cycleHeadline">Be the next<br>store they line up for</span></h1>
@@ -380,7 +384,7 @@
     </div>
   </div>
   <div class="hero-dots" id="heroDots" style="display:none;">
-    <span class="active"></span><span></span>
+    <span class="active"></span><span></span><span></span><span></span><span></span>
   </div>
 </section>
 
@@ -448,7 +452,10 @@
   // Hero headline + background cycling
   const slides = [
     { headline: "Be the next<br>store they line up for" },
-    { headline: "Be the next<br>global empire" }
+    { headline: "Be the next<br>street style icon" },
+    { headline: "Be the next<br>sold-out drop" },
+    { headline: "Be the next<br>runway favourite" },
+    { headline: "Be the next<br>city's best dressed" }
   ];
   const cycleEl = document.getElementById('cycleHeadline');
   const heroVids = document.querySelectorAll('#heroBg video');
