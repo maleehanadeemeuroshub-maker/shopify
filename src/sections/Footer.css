@@ -1,0 +1,102 @@
+.footer {
+  position: relative;
+  overflow: hidden;
+  padding: 100px 0 40px;
+  background: #060807;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footer__glow {
+  position: absolute;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(149, 255, 138, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.footer__cta {
+  text-align: center;
+  padding-bottom: 90px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  margin-bottom: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+.footer__cta h2 {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4vw, 52px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  max-width: 720px;
+  line-height: 1.15;
+}
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: 1.6fr repeat(3, 1fr);
+  gap: 40px;
+  margin-bottom: 70px;
+}
+.footer__brand .footer__logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.footer__brand p {
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--ink-faint);
+  max-width: 280px;
+  line-height: 1.55;
+}
+
+.footer__col h5 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 16px;
+}
+.footer__col ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.footer__col li {
+  font-size: 14px;
+  color: var(--ink-dim);
+  cursor: pointer;
+  transition: color 0.2s ease;
+  width: fit-content;
+}
+.footer__col li:hover {
+  color: var(--ink);
+}
+
+.footer__bottom {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 26px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+@media (max-width: 760px) {
+  .footer__grid {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 36px;
+  }
+  .footer__bottom {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

@@ -1,0 +1,79 @@
+.bg-video {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: clamp(420px, 44vw, 780px);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.bg-video__frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 10%,
+    black 26%,
+    black 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 10%,
+    black 26%,
+    black 100%
+  );
+}
+
+.bg-video__frame video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  opacity: 0;
+  transition: opacity 1.4s var(--ease-soft);
+  filter: saturate(1.05) contrast(1.02);
+}
+
+.bg-video__frame video.active {
+  opacity: 1;
+}
+
+.bg-video__vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, var(--bg) 0%, rgba(7, 9, 10, 0.55) 22%, rgba(7, 9, 10, 0) 48%, rgba(7, 9, 10, 0.18) 100%),
+    linear-gradient(to top, rgba(7, 9, 10, 0.7) 0%, rgba(7, 9, 10, 0) 30%, rgba(7, 9, 10, 0) 78%, rgba(7, 9, 10, 0.55) 100%);
+}
+
+@media (max-width: 1100px) {
+  .bg-video {
+    width: 56vw;
+  }
+}
+
+@media (max-width: 760px) {
+  .bg-video {
+    position: absolute;
+    width: 100%;
+    height: 62%;
+    top: auto;
+    bottom: 0;
+    right: 0;
+  }
+  .bg-video__frame {
+    -webkit-mask-image: linear-gradient(to top, transparent 0%, black 22%, black 100%);
+    mask-image: linear-gradient(to top, transparent 0%, black 22%, black 100%);
+  }
+  .bg-video__vignette {
+    background:
+      linear-gradient(to top, var(--bg) 0%, rgba(7, 9, 10, 0.5) 18%, rgba(7, 9, 10, 0) 42%),
+      linear-gradient(to bottom, rgba(7, 9, 10, 0.5) 0%, rgba(7, 9, 10, 0) 30%);
+  }
+}
