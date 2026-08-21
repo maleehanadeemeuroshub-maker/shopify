@@ -12,6 +12,7 @@ import { ModalProvider } from './context/ModalContext.jsx';
 import { CartProvider } from './context/CartContext.jsx';
 import { WishlistProvider } from './context/WishlistContext.jsx';
 import { QuickViewProvider } from './context/QuickViewContext.jsx';
+import { ToastProvider } from './context/ToastContext.jsx';
 
 const Shop = lazy(() => import('./pages/Shop.jsx'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail.jsx'));
@@ -39,40 +40,42 @@ function RouteFallback() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ModalProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <QuickViewProvider>
-              <div className="grain" aria-hidden="true" />
-              <CursorGlow />
-              <ScrollToTop />
-              <Navbar />
-              <main>
-                <Suspense fallback={<RouteFallback />}>
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/shop" element={<Shop />} />
-                    <Route path="/product/:id" element={<ProductDetail />} />
-                    <Route path="/cart" element={<Cart />} />
-                    <Route path="/wishlist" element={<Wishlist />} />
-                    <Route path="/checkout" element={<Checkout />} />
-                    <Route path="/order-confirmation" element={<OrderConfirmation />} />
-                    <Route path="/account" element={<Account />} />
-                    <Route path="/why-genzwears" element={<WhyGenzWears />} />
-                    <Route path="/enterprise" element={<Enterprise />} />
-                    <Route path="/pricing" element={<Pricing />} />
-                  </Routes>
-                </Suspense>
-              </main>
-              <Footer />
-              <AuthModal />
-              <CartDrawer />
-              <QuickViewModal />
-            </QuickViewProvider>
-          </WishlistProvider>
-        </CartProvider>
-      </ModalProvider>
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <ModalProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <QuickViewProvider>
+                <div className="grain" aria-hidden="true" />
+                <CursorGlow />
+                <ScrollToTop />
+                <Navbar />
+                <main>
+                  <Suspense fallback={<RouteFallback />}>
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/shop" element={<Shop />} />
+                      <Route path="/product/:id" element={<ProductDetail />} />
+                      <Route path="/cart" element={<Cart />} />
+                      <Route path="/wishlist" element={<Wishlist />} />
+                      <Route path="/checkout" element={<Checkout />} />
+                      <Route path="/order-confirmation" element={<OrderConfirmation />} />
+                      <Route path="/account" element={<Account />} />
+                      <Route path="/why-genzwears" element={<WhyGenzWears />} />
+                      <Route path="/enterprise" element={<Enterprise />} />
+                      <Route path="/pricing" element={<Pricing />} />
+                    </Routes>
+                  </Suspense>
+                </main>
+                <Footer />
+                <AuthModal />
+                <CartDrawer />
+                <QuickViewModal />
+              </QuickViewProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </ModalProvider>
+      </AuthProvider>
+    </ToastProvider>
   );
 }

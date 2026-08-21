@@ -5,6 +5,8 @@ import ProductImage from '../components/ProductImage.jsx';
 import MagneticButton from '../components/MagneticButton.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useToast } from '../context/ToastContext.jsx';
+import { emailApi } from '../lib/api.js';
 import { computeCartTotals, STANDARD_SHIPPING, EXPRESS_SHIPPING } from '../utils/cartMath.js';
 import { formatPrice } from '../utils/format.js';
 import './Checkout.css';
@@ -17,6 +19,7 @@ function generateOrderNumber() {
 export default function Checkout() {
   const { items, clearCart } = useCart();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const [delivery, setDelivery] = useState('standard');
@@ -66,6 +69,7 @@ export default function Checkout() {
     const order = {
       orderNumber: generateOrderNumber(),
       date: new Date().toISOString(),
+      status: 'confirmed',
       items,
       totals,
       customer: { email: form.email, firstName: form.firstName, lastName: form.lastName, phone: form.phone },
@@ -81,6 +85,15 @@ export default function Checkout() {
     };
 
     localStorage.setItem('genzwears_last_order', JSON.stringify(order));
+
+    // Order is already committed above — the email is best-effort and must
+    // never delay or block the confirmation the user is about to see.
+    emailApi.order({
+      name: `${order.customer.firstName} ${order.customer.lastName}`.trim(),
+      email: order.customer.email,
+      order,
+    });
+    showToast('Order placed successfully! Your confirmation has been sent to your email.');
 
     window.setTimeout(() => {
       clearCart();

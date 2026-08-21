@@ -1,7 +1,14 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { emailApi } from '../lib/api.js';
+import { useAuth } from './AuthContext.jsx';
+import { useToast } from './ToastContext.jsx';
 
 const CartContext = createContext(null);
 const STORAGE_KEY = 'genzwears_cart';
+
+// Shortened for demo purposes — a real store would wait hours, not minutes,
+// before treating a cart as abandoned.
+const ABANDONED_CART_DELAY_MS = 2 * 60 * 1000;
 
 function lineId(productId, size, color) {
   return `${productId}__${size ?? 'na'}__${color ?? 'na'}`;
@@ -19,35 +26,96 @@ function readStoredCart() {
 export function CartProvider({ children }) {
   const [items, setItems] = useState(readStoredCart);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { user } = useAuth();
+  const { showToast } = useToast();
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
-  const addItem = useCallback((product, { size, color, qty = 1 } = {}) => {
-    const id = lineId(product.id, size, color);
-    setItems((current) => {
-      const existing = current.find((line) => line.id === id);
-      if (existing) {
-        return current.map((line) => (line.id === id ? { ...line, qty: line.qty + qty } : line));
+  const { subtotal, itemCount } = useMemo(() => {
+    return items.reduce(
+      (acc, line) => ({
+        subtotal: acc.subtotal + line.price * line.qty,
+        itemCount: acc.itemCount + line.qty,
+      }),
+      { subtotal: 0, itemCount: 0 }
+    );
+  }, [items]);
+
+  // Abandoned-cart watcher: fires once per non-empty cart, only after the
+  // cart has sat untouched for ABANDONED_CART_DELAY_MS. Any cart edit
+  // (add/remove/qty change) restarts the countdown; emptying the cart
+  // (including a completed checkout, which calls clearCart) cancels it and
+  // re-arms the "once per cart" gate for next time.
+  const abandonedFiredRef = useRef(false);
+  useEffect(() => {
+    if (items.length === 0) {
+      abandonedFiredRef.current = false;
+      return undefined;
+    }
+    if (!user || abandonedFiredRef.current) return undefined;
+
+    const timer = window.setTimeout(() => {
+      abandonedFiredRef.current = true;
+      emailApi.abandonedCart({
+        name: user.name,
+        email: user.email,
+        items: items.map((l) => ({ name: l.name, image: l.image, color: l.color, size: l.size, price: l.price, qty: l.qty })),
+        cartTotal: subtotal,
+      });
+    }, ABANDONED_CART_DELAY_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [items, user, subtotal]);
+
+  const addItem = useCallback(
+    (product, { size, color, qty = 1 } = {}) => {
+      const id = lineId(product.id, size, color);
+      // Decided outside the setState updater on purpose: updater functions
+      // can run more than once (React StrictMode double-invokes them in
+      // dev), and this flag gates a real network call — it must not fire twice.
+      const isNewLine = !items.some((line) => line.id === id);
+
+      setItems((current) => {
+        const existing = current.find((line) => line.id === id);
+        if (existing) {
+          return current.map((line) => (line.id === id ? { ...line, qty: line.qty + qty } : line));
+        }
+        return [
+          ...current,
+          {
+            id,
+            productId: product.id,
+            name: product.name,
+            image: product.images?.[0],
+            price: product.salePrice ?? product.price,
+            originalPrice: product.price,
+            size: size ?? null,
+            color: color ?? null,
+            qty,
+          },
+        ];
+      });
+      setDrawerOpen(true);
+
+      // One cart email per newly-added line — never on a quantity bump of
+      // something already in the cart, and only for logged-in users (we
+      // need a real address to send to).
+      if (isNewLine && user) {
+        const unitPrice = product.salePrice ?? product.price;
+        emailApi.cart({
+          name: user.name,
+          email: user.email,
+          product: { name: product.name, image: product.images?.[0], price: unitPrice, qty, size, color },
+          cartSubtotal: subtotal + unitPrice * qty,
+          itemCount: itemCount + qty,
+        });
+        showToast("Added to cart. We've sent you a confirmation email.");
       }
-      return [
-        ...current,
-        {
-          id,
-          productId: product.id,
-          name: product.name,
-          image: product.images?.[0],
-          price: product.salePrice ?? product.price,
-          originalPrice: product.price,
-          size: size ?? null,
-          color: color ?? null,
-          qty,
-        },
-      ];
-    });
-    setDrawerOpen(true);
-  }, []);
+    },
+    [items, user, subtotal, itemCount, showToast]
+  );
 
   const removeItem = useCallback((id) => {
     setItems((current) => current.filter((line) => line.id !== id));
@@ -63,16 +131,6 @@ export function CartProvider({ children }) {
 
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
-
-  const { subtotal, itemCount } = useMemo(() => {
-    return items.reduce(
-      (acc, line) => ({
-        subtotal: acc.subtotal + line.price * line.qty,
-        itemCount: acc.itemCount + line.qty,
-      }),
-      { subtotal: 0, itemCount: 0 }
-    );
-  }, [items]);
 
   const value = useMemo(
     () => ({ items, addItem, removeItem, updateQty, clearCart, subtotal, itemCount, drawerOpen, openDrawer, closeDrawer }),

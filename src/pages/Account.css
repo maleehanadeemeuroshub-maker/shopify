@@ -132,6 +132,62 @@
   font-weight: 700;
 }
 
+.account__order-head-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.account__status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  border: 1px solid;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.account__status-sim {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--panel-border);
+}
+.account__status-sim .account__demo-note {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.account__status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.account__status-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--panel-border);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-dim);
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.account__status-btn:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.04);
+}
+.account__status-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .account__order-items {
   display: flex;
   flex-direction: column;
