@@ -1,0 +1,140 @@
+.quick-view {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 34px;
+}
+
+.quick-view__gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quick-view__main {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+}
+.quick-view__main img,
+.quick-view__main .product-image-fallback {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.quick-view__discount {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: var(--green);
+  color: #0a0d0b;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+}
+
+.quick-view__thumbs {
+  display: flex;
+  gap: 8px;
+}
+.quick-view__thumbs button {
+  width: 56px;
+  height: 66px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1.5px solid transparent;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+.quick-view__thumbs button img,
+.quick-view__thumbs button .product-image-fallback {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.quick-view__thumbs button:hover {
+  opacity: 0.9;
+}
+.quick-view__thumbs button.is-active {
+  opacity: 1;
+  border-color: var(--green);
+}
+
+.quick-view__info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 4px;
+}
+
+.quick-view__category {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.quick-view__info h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: -6px;
+}
+
+.quick-view__price {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.quick-view__price-sale {
+  font-size: 22px;
+  font-weight: 700;
+}
+.quick-view__price-original {
+  font-size: 15px;
+  color: var(--ink-faint);
+  text-decoration: line-through;
+}
+
+.quick-view__desc {
+  font-size: 14px;
+  color: var(--ink-dim);
+  line-height: 1.55;
+}
+
+.quick-view__ctas {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 6px;
+}
+.quick-view__ctas .magnetic-btn {
+  justify-content: center;
+  width: 100%;
+}
+
+.quick-view__fulllink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-dim);
+  transition: color 0.2s ease;
+}
+.quick-view__fulllink:hover {
+  color: var(--green);
+}
+
+@media (max-width: 720px) {
+  .quick-view {
+    grid-template-columns: 1fr;
+  }
+}

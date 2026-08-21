@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import './Modal.css';
 
-export default function Modal({ open, onClose, labelledBy, children }) {
+export default function Modal({ open, onClose, labelledBy, size = 'md', children }) {
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (e) => {
@@ -33,7 +33,7 @@ export default function Modal({ open, onClose, labelledBy, children }) {
           }}
         >
           <motion.div
-            className="modal-panel"
+            className={`modal-panel modal-panel--${size}`}
             role="dialog"
             aria-modal="true"
             aria-labelledby={labelledBy}

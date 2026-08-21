@@ -23,6 +23,10 @@
   box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
+.modal-panel--lg {
+  width: min(94vw, 900px);
+}
+
 .modal-close {
   position: absolute;
   top: 18px;

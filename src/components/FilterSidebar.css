@@ -1,0 +1,58 @@
+.filter-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.filter-group h4 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 14px;
+}
+
+.filter-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 13.5px;
+  color: var(--ink-dim);
+  cursor: pointer;
+}
+.filter-check:hover {
+  color: var(--ink);
+}
+.filter-check input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--green);
+  cursor: pointer;
+}
+
+.filter-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-chip {
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--panel-border);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-dim);
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.filter-chip:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--ink);
+}
+.filter-chip.is-active {
+  border-color: var(--green);
+  background: rgba(149, 255, 138, 0.1);
+  color: var(--green);
+}

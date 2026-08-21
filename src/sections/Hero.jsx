@@ -4,7 +4,6 @@ import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import BackgroundVideo from '../components/BackgroundVideo.jsx';
 import MagneticButton from '../components/MagneticButton.jsx';
-import { useModal } from '../context/ModalContext.jsx';
 import './Hero.css';
 
 const Scene3D = lazy(() => import('../components/Scene3D.jsx'));
@@ -19,9 +18,9 @@ const HEADLINES = [
 ];
 
 const STATS = [
-  { value: '150+', label: 'Product editions shipped yearly' },
-  { value: '2.4M', label: 'Storefronts powered worldwide' },
-  { value: '99.98%', label: 'Uptime, cinematic or not' },
+  { value: '30+', label: 'New styles added every season' },
+  { value: '4.8★', label: 'Average rating across 2,000+ reviews' },
+  { value: '30-Day', label: 'Free returns on every order' },
 ];
 
 export default function Hero() {
@@ -35,7 +34,6 @@ export default function Hero() {
   const headlineRef = useRef(null);
 
   const handleIndexChange = useCallback((i) => setSlide(i), []);
-  const { openAuth } = useModal();
   const navigate = useNavigate();
 
   // entrance timeline
@@ -99,17 +97,17 @@ export default function Hero() {
         </h1>
 
         <p className="hero__para" ref={paraRef}>
-          Dream big and build fast on GENZ-WEARS.
+          Heavyweight essentials, cut for movement.
           <br />
-          The world&apos;s best commerce platform, engineered for the next generation of brands.
+          Streetwear built to outlast the season it dropped in.
         </p>
 
         <div className="hero__ctas" ref={ctasRef}>
-          <MagneticButton variant="solid" onClick={() => openAuth('signup')}>
-            Start for free <ArrowRight size={16} />
+          <MagneticButton variant="solid" onClick={() => navigate('/shop')}>
+            Shop Now <ArrowRight size={16} />
           </MagneticButton>
           <MagneticButton variant="outline" onClick={() => navigate('/why-genzwears')}>
-            <span className="play-ic">&#9658;</span> Why we build GENZ-WEARS
+            <span className="play-ic">&#9658;</span> Our Story
           </MagneticButton>
         </div>
 

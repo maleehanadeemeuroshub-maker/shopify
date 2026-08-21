@@ -69,44 +69,54 @@
   transform: rotate(180deg);
 }
 
-.navbar__badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  padding: 7px 15px;
-  border-radius: var(--radius-pill);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink);
+.navitem--sale {
+  color: var(--green-dim);
 }
-.navbar__badge-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--green), var(--violet));
+.navitem--sale:hover {
+  color: var(--green);
 }
 
 .navbar__right {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 6px;
 }
-.navbar__login {
-  font-size: 14.5px;
-  font-weight: 500;
+
+.navbar__icon {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
   color: var(--ink-dim);
-  transition: color 0.25s ease;
+  transition: background 0.2s ease, color 0.2s ease;
 }
-.navbar__login:hover {
+.navbar__icon:hover {
+  background: rgba(255, 255, 255, 0.06);
   color: var(--ink);
 }
 
-.navbar__user {
-  font-size: 14.5px;
-  font-weight: 600;
-  color: var(--ink);
-  padding: 8px 4px;
+.navbar__badge-count {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--green);
+  color: #0a0d0b;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar__hamburger {
+  display: none;
 }
 
 /* ---------- MEGA MENU ---------- */
@@ -171,15 +181,38 @@
   margin-bottom: 14px;
   background: linear-gradient(120deg, #1b3327, #17201b 45%, #2c4c37);
 }
-.innovation-panel a {
+.innovation-panel button {
   font-weight: 700;
   font-size: 14.5px;
   color: var(--ink);
+}
+.innovation-panel button:hover {
+  color: var(--green);
 }
 .innovation-panel p {
   font-size: 12.5px;
   color: var(--ink-faint);
   margin-top: 4px;
+}
+
+/* ---------- MOBILE NAV ---------- */
+.mobile-nav {
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+.mobile-nav a {
+  padding: 14px 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-dim);
+  border-bottom: 1px solid var(--panel-border);
+}
+.mobile-nav a:hover {
+  color: var(--ink);
+}
+.mobile-nav__sale {
+  color: var(--green-dim) !important;
 }
 
 @media (max-width: 1024px) {
@@ -189,13 +222,28 @@
   .mega-menu {
     display: none;
   }
+  .navbar__hamburger {
+    display: flex;
+  }
+  .mobile-nav {
+    display: flex;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(9, 12, 11, 0.98);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--panel-border);
+    padding: 6px 20px 10px;
+  }
 }
 
 @media (max-width: 640px) {
   .navbar__inner {
     padding: 14px 20px;
   }
-  .navbar__login {
-    display: none;
+  .navbar__icon {
+    width: 34px;
+    height: 34px;
   }
 }

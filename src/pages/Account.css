@@ -1,0 +1,225 @@
+.account {
+  padding-top: 150px;
+  padding-bottom: 100px;
+  min-height: 100vh;
+}
+
+.account h1 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.6vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.account__welcome {
+  color: var(--ink-faint);
+  font-size: 14px;
+  margin-top: 8px;
+  margin-bottom: 36px;
+}
+
+.account__layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.account__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: sticky;
+  top: 110px;
+}
+.account__nav button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-dim);
+  text-align: left;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.account__nav button:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink);
+}
+.account__nav button.is-active {
+  background: rgba(149, 255, 138, 0.08);
+  color: var(--green);
+}
+.account__logout {
+  margin-top: 14px;
+  border-top: 1px solid var(--panel-border);
+  padding-top: 18px !important;
+  color: var(--ink-faint) !important;
+}
+.account__logout:hover {
+  color: #ff9d9d !important;
+  background: none !important;
+}
+
+.account__card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  padding: 30px;
+}
+.account__card h2 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 22px;
+}
+
+.account__profile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.account__profile-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.account__profile-grid span {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+}
+.account__profile-grid strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.account__demo-note {
+  margin-top: 22px;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.account__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  color: var(--ink-dim);
+  font-size: 14px;
+}
+
+.account__order-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--panel-border);
+  margin-bottom: 16px;
+}
+.account__order-head strong {
+  display: block;
+  font-size: 15px;
+}
+.account__order-head span {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+.account__order-total {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.account__order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.account__order-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.account__order-img {
+  width: 46px;
+  height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  flex-shrink: 0;
+}
+.account__order-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.account__order-item p {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.account__order-item span {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+.account__order-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green);
+}
+
+.account__wishlist-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.account__address {
+  padding-bottom: 18px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--panel-border);
+}
+.account__address-label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+.account__address p {
+  font-size: 13.5px;
+  color: var(--ink-dim);
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .account__layout {
+    grid-template-columns: 1fr;
+  }
+  .account__nav {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .account__logout {
+    margin-top: 0;
+    border-top: none;
+    padding-top: 11px !important;
+  }
+  .account__profile-grid {
+    grid-template-columns: 1fr;
+  }
+  .account__wishlist-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .account {
+    padding-top: 120px;
+  }
+}

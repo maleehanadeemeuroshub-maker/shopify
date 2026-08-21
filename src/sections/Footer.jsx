@@ -1,27 +1,41 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import MagneticButton from '../components/MagneticButton.jsx';
-import { useModal } from '../context/ModalContext.jsx';
 import './Footer.css';
 
 const COLUMNS = [
   {
-    title: 'Product',
-    target: '/#features',
+    title: 'Shop',
+    target: '/shop',
     items: [
-      { label: 'Website Builder' },
-      { label: 'Themes' },
-      { label: 'Checkout' },
-      { label: 'Sidekick AI' },
-      { label: 'Pricing', target: '/pricing' },
+      { label: 'New Arrivals', target: '/shop?category=New+Arrivals' },
+      { label: 'Hoodies', target: '/shop?category=Hoodies' },
+      { label: 'Accessories', target: '/shop?category=Accessories' },
+      { label: 'Sale', target: '/shop?category=Sale' },
+      { label: 'All Products', target: '/shop' },
     ],
   },
-  { title: 'Company', target: '/why-genzwears', items: ['About', 'Careers', 'Press', 'Partners'].map((label) => ({ label })) },
-  { title: 'Resources', target: '/enterprise', items: ['Docs', 'API', 'Community', 'Support'].map((label) => ({ label })) },
+  {
+    title: 'Company',
+    target: '/why-genzwears',
+    items: ['About Us', 'Careers', 'Press', 'Wholesale'].map((label) => ({
+      label,
+      target: label === 'Wholesale' ? '/enterprise' : '/why-genzwears',
+    })),
+  },
+  {
+    title: 'Support',
+    target: '/account',
+    items: [
+      { label: 'My Account', target: '/account' },
+      { label: 'Track Order', target: '/account' },
+      { label: 'Wishlist', target: '/wishlist' },
+      { label: 'Cart', target: '/cart' },
+    ],
+  },
 ];
 
 export default function Footer() {
-  const { openAuth } = useModal();
   const navigate = useNavigate();
 
   return (
@@ -35,16 +49,16 @@ export default function Footer() {
           viewport={{ once: true, amount: 0.4 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <h2>Ready to be the next store they line up for?</h2>
-          <MagneticButton variant="solid" onClick={() => openAuth('signup')}>
-            Start for free
+          <h2>Ready to find your next favorite piece?</h2>
+          <MagneticButton variant="solid" onClick={() => navigate('/shop')}>
+            Shop Now
           </MagneticButton>
         </motion.div>
 
         <div className="footer__grid">
           <div className="footer__brand">
             <span className="footer__logo">GENZ-WEARS</span>
-            <p>The world&apos;s best commerce platform, engineered for the next generation of brands.</p>
+            <p>Heavyweight streetwear essentials, cut for movement — a practice storefront built with React.</p>
           </div>
           {COLUMNS.map((col) => (
             <div className="footer__col" key={col.title}>

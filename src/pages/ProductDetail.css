@@ -1,0 +1,320 @@
+.pdp {
+  padding-top: 140px;
+  padding-bottom: 40px;
+}
+
+.pdp-not-found {
+  padding-top: 200px;
+  padding-bottom: 140px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.pdp-not-found h1 {
+  font-family: var(--font-display);
+  font-size: 32px;
+}
+.pdp-not-found p {
+  color: var(--ink-dim);
+}
+
+.pdp-breadcrumb {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  margin-bottom: 30px;
+}
+.pdp-breadcrumb a:hover {
+  color: var(--ink);
+}
+.pdp-breadcrumb span {
+  color: var(--ink-dim);
+}
+
+.pdp-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 56px;
+}
+
+.pdp-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: sticky;
+  top: 110px;
+  align-self: start;
+}
+
+.pdp-gallery__main {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  cursor: zoom-in;
+}
+
+.pdp-gallery__frame {
+  width: 100%;
+  height: 100%;
+}
+.pdp-gallery__frame img,
+.pdp-gallery__frame .product-image-fallback {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+.pdp-gallery__frame img.is-zoomed {
+  transform: scale(1.9);
+}
+
+.pdp-gallery__badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: var(--green);
+  color: #0a0d0b;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+}
+
+.pdp-gallery__zoomhint {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ink-dim);
+  background: rgba(7, 9, 10, 0.6);
+  backdrop-filter: blur(4px);
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  pointer-events: none;
+}
+
+.pdp-gallery__thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 88px));
+  gap: 10px;
+}
+.pdp-gallery__thumbs button {
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1.5px solid transparent;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+.pdp-gallery__thumbs button img,
+.pdp-gallery__thumbs button .product-image-fallback {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pdp-gallery__thumbs button:hover {
+  opacity: 0.85;
+}
+.pdp-gallery__thumbs button.is-active {
+  opacity: 1;
+  border-color: var(--green);
+}
+
+.pdp-info {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 40px;
+}
+
+.pdp-info__category {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.pdp-info h1 {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3vw, 36px);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin-top: -6px;
+}
+
+.pdp-info__price {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.pdp-info__price-sale {
+  font-size: 26px;
+  font-weight: 700;
+}
+.pdp-info__price-original {
+  font-size: 16px;
+  color: var(--ink-faint);
+  text-decoration: line-through;
+}
+.pdp-info__discount {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--green);
+  background: rgba(149, 255, 138, 0.1);
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+}
+
+.pdp-info__short {
+  font-size: 14.5px;
+  color: var(--ink-dim);
+  line-height: 1.6;
+  max-width: 46ch;
+}
+
+.pdp-info__selectors {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 22px 0;
+  border-top: 1px solid var(--panel-border);
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.pdp-info__stock {
+  font-size: 13px;
+  font-weight: 600;
+}
+.pdp-info__stock--ok {
+  color: var(--green-dim);
+}
+.pdp-info__stock--low {
+  color: #ffb066;
+}
+.pdp-info__stock--out {
+  color: var(--ink-faint);
+}
+
+.pdp-info__ctas {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: stretch;
+}
+.pdp-info__ctas .magnetic-btn {
+  justify-content: center;
+  width: 100%;
+  height: 50px;
+}
+.pdp-info__wishlist {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-pill);
+  border: 1.4px solid var(--panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-dim);
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.pdp-info__wishlist:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--ink);
+}
+.pdp-info__wishlist.is-active {
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.pdp-info__trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  font-size: 12.5px;
+  color: var(--ink-dim);
+}
+.pdp-info__trust div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.pdp-info__trust svg {
+  color: var(--green);
+}
+
+.pdp-info__sku {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.size-guide h2 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.size-guide p {
+  font-size: 13.5px;
+  color: var(--ink-dim);
+  margin-bottom: 20px;
+}
+.size-guide table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.size-guide th,
+.size-guide td {
+  padding: 10px 8px;
+  text-align: left;
+  font-size: 13px;
+  border-bottom: 1px solid var(--panel-border);
+}
+.size-guide th {
+  color: var(--ink-faint);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+.size-guide td {
+  color: var(--ink-dim);
+}
+.size-guide td:first-child {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+@media (max-width: 1024px) {
+  .pdp-layout {
+    grid-template-columns: 1fr;
+    gap: 34px;
+  }
+  .pdp-gallery {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .pdp {
+    padding-top: 110px;
+  }
+  .pdp-info__ctas {
+    grid-template-columns: 1fr 1fr;
+  }
+  .pdp-info__wishlist {
+    grid-column: span 2;
+    width: 100%;
+  }
+  .pdp-gallery__thumbs {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
