@@ -440,7 +440,7 @@ export const PRODUCTS = [
     description:
       'A quilted mid-layer jacket built with a four-pocket utility front and a stand collar. Warm enough to wear alone in mild weather, or layered under a shell.',
     material: 'Shell: 100% Nylon · Fill: Recycled Polyester',
-    stock: 3,
+    stock: 0,
     tags: ['sale'],
   }),
   product({

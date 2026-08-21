@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Heart, RefreshCw, ShieldCheck, ShoppingBag, Truck, ZoomIn } from 'lucide-react';
+import { Eye, Flame, Heart, RefreshCw, ShieldCheck, ShoppingBag, Truck, ZoomIn } from 'lucide-react';
 import ProductImage from '../components/ProductImage.jsx';
 import StarRating from '../components/StarRating.jsx';
 import MagneticButton from '../components/MagneticButton.jsx';
@@ -9,6 +9,8 @@ import Accordion from '../components/Accordion.jsx';
 import Modal from '../components/Modal.jsx';
 import ProductRail from '../components/ProductRail.jsx';
 import ReviewsSection from '../components/ReviewsSection.jsx';
+import NotifyStockForm from '../components/NotifyStockForm.jsx';
+import FrequentlyBoughtTogether from '../components/FrequentlyBoughtTogether.jsx';
 import { ColorSelector, SizeSelector, QuantitySelector } from '../components/ProductSelectors.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { useWishlist } from '../context/WishlistContext.jsx';
@@ -16,6 +18,7 @@ import { useProductReviews } from '../hooks/useProductReviews.js';
 import { getProductById, getRelatedProducts } from '../data/products.js';
 import { formatPrice, discountPercent } from '../utils/format.js';
 import { recordView, getRecentlyViewedIds } from '../utils/recentlyViewed.js';
+import { getViewerCount, getSoldTodayCount } from '../utils/socialProof.js';
 import './ProductDetail.css';
 
 export default function ProductDetail() {
@@ -52,6 +55,7 @@ export default function ProductDetail() {
 
   const related = useMemo(() => (product ? getRelatedProducts(product) : []), [product]);
   const { average: reviewAverage, count: reviewCount } = useProductReviews(product);
+  const fbtSuggestions = useMemo(() => related.filter((p) => p.stock > 0).slice(0, 2), [related]);
 
   if (!product) {
     return (
@@ -68,6 +72,8 @@ export default function ProductDetail() {
   const discount = discountPercent(product.price, product.salePrice);
   const outOfStock = product.stock <= 0;
   const wished = has(product.id);
+  const viewerCount = getViewerCount(product.id);
+  const soldToday = getSoldTodayCount(product.id);
 
   const handleMouseMove = (e) => {
     const rect = mediaRef.current.getBoundingClientRect();
@@ -215,11 +221,19 @@ export default function ProductDetail() {
             {outOfStock ? (
               <span className="pdp-info__stock--out">Out of stock</span>
             ) : product.stock <= 5 ? (
-              <span className="pdp-info__stock--low">Only {product.stock} left in stock</span>
+              <span className="pdp-info__stock--low">
+                <Flame size={13} /> Only {product.stock} left in stock — selling fast
+              </span>
             ) : (
               <span className="pdp-info__stock--ok">In stock, ready to ship</span>
             )}
           </div>
+
+          {!outOfStock && (
+            <p className="pdp-info__urgency">
+              <Eye size={13} /> {viewerCount} viewing now · {soldToday} sold in the last 24h
+            </p>
+          )}
 
           <div className="pdp-info__ctas">
             <MagneticButton variant="solid" onClick={handleAddToCart} disabled={outOfStock}>
@@ -238,6 +252,8 @@ export default function ProductDetail() {
             </button>
           </div>
 
+          {outOfStock && <NotifyStockForm productId={product.id} />}
+
           <div className="pdp-info__trust">
             <div>
               <Truck size={16} /> Free shipping over $100
@@ -255,6 +271,8 @@ export default function ProductDetail() {
           <Accordion items={accordionItems} />
         </div>
       </div>
+
+      <FrequentlyBoughtTogether mainProduct={product} suggestions={fbtSuggestions} />
 
       <ReviewsSection product={product} />
 
@@ -275,54 +293,56 @@ export default function ProductDetail() {
         <div className="size-guide">
           <h2 id="size-guide-title">Size Guide</h2>
           <p>Measurements in inches. If you&apos;re between sizes, we recommend sizing up.</p>
-          <table>
-            <thead>
-              <tr>
-                <th>Size</th>
-                <th>Chest</th>
-                <th>Waist</th>
-                <th>Length</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>XS</td>
-                <td>34–36</td>
-                <td>28–30</td>
-                <td>26</td>
-              </tr>
-              <tr>
-                <td>S</td>
-                <td>36–38</td>
-                <td>30–32</td>
-                <td>27</td>
-              </tr>
-              <tr>
-                <td>M</td>
-                <td>39–41</td>
-                <td>33–35</td>
-                <td>28</td>
-              </tr>
-              <tr>
-                <td>L</td>
-                <td>42–44</td>
-                <td>36–38</td>
-                <td>29</td>
-              </tr>
-              <tr>
-                <td>XL</td>
-                <td>45–47</td>
-                <td>39–41</td>
-                <td>30</td>
-              </tr>
-              <tr>
-                <td>XXL</td>
-                <td>48–50</td>
-                <td>42–44</td>
-                <td>31</td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="size-guide__table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Size</th>
+                  <th>Chest</th>
+                  <th>Waist</th>
+                  <th>Length</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>XS</td>
+                  <td>34–36</td>
+                  <td>28–30</td>
+                  <td>26</td>
+                </tr>
+                <tr>
+                  <td>S</td>
+                  <td>36–38</td>
+                  <td>30–32</td>
+                  <td>27</td>
+                </tr>
+                <tr>
+                  <td>M</td>
+                  <td>39–41</td>
+                  <td>33–35</td>
+                  <td>28</td>
+                </tr>
+                <tr>
+                  <td>L</td>
+                  <td>42–44</td>
+                  <td>36–38</td>
+                  <td>29</td>
+                </tr>
+                <tr>
+                  <td>XL</td>
+                  <td>45–47</td>
+                  <td>39–41</td>
+                  <td>30</td>
+                </tr>
+                <tr>
+                  <td>XXL</td>
+                  <td>48–50</td>
+                  <td>42–44</td>
+                  <td>31</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </Modal>
     </div>

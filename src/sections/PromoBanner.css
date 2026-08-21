@@ -59,3 +59,10 @@
   transform: translateY(-2px);
   box-shadow: 0 12px 30px -10px rgba(149, 255, 138, 0.5);
 }
+
+@media (max-width: 640px) {
+  .promo-banner {
+    margin: 40px 0;
+    padding: 50px 0;
+  }
+}

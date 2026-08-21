@@ -198,9 +198,21 @@
   color: var(--green-dim);
 }
 .pdp-info__stock--low {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   color: #ffb066;
 }
 .pdp-info__stock--out {
+  color: var(--ink-faint);
+}
+
+.pdp-info__urgency {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  font-size: 12px;
   color: var(--ink-faint);
 }
 
@@ -267,8 +279,13 @@
   color: var(--ink-dim);
   margin-bottom: 20px;
 }
+.size-guide__table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
 .size-guide table {
   width: 100%;
+  min-width: 360px;
   border-collapse: collapse;
 }
 .size-guide th,
