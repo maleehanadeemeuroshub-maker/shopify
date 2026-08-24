@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 const ModalContext = createContext(null);
 
@@ -8,11 +8,9 @@ export function ModalProvider({ children }) {
   const openAuth = useCallback((mode = 'login') => setModal(mode), []);
   const closeModal = useCallback(() => setModal(null), []);
 
-  return (
-    <ModalContext.Provider value={{ modal, openAuth, closeModal }}>
-      {children}
-    </ModalContext.Provider>
-  );
+  const value = useMemo(() => ({ modal, openAuth, closeModal }), [modal, openAuth, closeModal]);
+
+  return <ModalContext.Provider value={value}>{children}</ModalContext.Provider>;
 }
 
 export function useModal() {

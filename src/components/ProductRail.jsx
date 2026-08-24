@@ -1,43 +1,59 @@
-import { motion } from 'framer-motion';
+import { useLayoutEffect, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductCard from './ProductCard.jsx';
+import SplitHeading from './SplitHeading.jsx';
+import { gsap, prefersReducedMotion } from '../lib/gsapConfig.js';
 import './ProductRail.css';
 
 export default function ProductRail({ eyebrow, title, subtitle, products, viewAllHref = '/shop' }) {
+  const gridRef = useRef(null);
+
+  useLayoutEffect(() => {
+    if (!gridRef.current || prefersReducedMotion()) return undefined;
+
+    const ctx = gsap.context(() => {
+      const cells = gsap.utils.toArray('.product-rail__cell', gridRef.current);
+      cells.forEach((cell) => {
+        gsap.fromTo(
+          cell,
+          { opacity: 0, y: 34, scale: 0.96 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            ease: 'none',
+            scrollTrigger: { trigger: cell, start: 'top 92%', end: 'top 68%', scrub: 0.6 },
+          }
+        );
+      });
+    }, gridRef);
+
+    return () => ctx.revert();
+  }, [products]);
+
   if (!products.length) return null;
 
   return (
     <section className="product-rail">
       <div className="container">
-        <motion.div
-          className="product-rail__head"
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        >
+        <div className="product-rail__head">
           <div>
-            {eyebrow && <span className="eyebrow">{eyebrow}</span>}
-            <h2 className="product-rail__title">{title}</h2>
+            <SplitHeading eyebrow={eyebrow} headingClassName="product-rail__title">
+              {title}
+            </SplitHeading>
             {subtitle && <p className="product-rail__subtitle">{subtitle}</p>}
           </div>
           <Link to={viewAllHref} className="product-rail__viewall">
             View all <ArrowRight size={15} />
           </Link>
-        </motion.div>
+        </div>
 
-        <div className="product-rail__grid">
-          {products.map((product, i) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.55, delay: (i % 4) * 0.08, ease: [0.16, 1, 0.3, 1] }}
-            >
+        <div className="product-rail__grid" ref={gridRef}>
+          {products.map((product) => (
+            <div className="product-rail__cell" key={product.id}>
               <ProductCard product={product} />
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

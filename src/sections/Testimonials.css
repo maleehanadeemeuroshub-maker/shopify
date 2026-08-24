@@ -20,14 +20,21 @@
   gap: 22px;
 }
 
+.testimonial-cell {
+  display: flex;
+  will-change: transform;
+}
+
 .testimonial-card {
   display: flex;
   flex-direction: column;
+  flex: 1;
   gap: 14px;
   padding: 24px;
   border-radius: var(--radius-md);
   background: var(--panel);
   border: 1px solid var(--panel-border);
+  will-change: opacity, transform;
 }
 
 .testimonial-card p {

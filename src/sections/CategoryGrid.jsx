@@ -1,6 +1,8 @@
-import { motion } from 'framer-motion';
+import { useLayoutEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import ProductImage from '../components/ProductImage.jsx';
+import SplitHeading from '../components/SplitHeading.jsx';
+import { gsap, prefersReducedMotion, MQ } from '../lib/gsapConfig.js';
 import './CategoryGrid.css';
 
 // Distinct from every product photo in src/data/products.js — these are
@@ -13,35 +15,84 @@ const CATEGORY_CARDS = [
 ];
 
 export default function CategoryGrid() {
+  const rowRef = useRef(null);
+  const cardRefs = useRef([]);
+  const imgRefs = useRef([]);
+  const revealRefs = useRef([]);
+
+  useLayoutEffect(() => {
+    const cards = cardRefs.current.filter(Boolean);
+    if (!cards.length) return undefined;
+
+    if (prefersReducedMotion()) {
+      gsap.set(cards, { opacity: 1, y: 0, rotateX: 0 });
+      gsap.set(revealRefs.current, { scaleY: 0 });
+      return undefined;
+    }
+
+    const ctx = gsap.context(() => {
+      cards.forEach((card, i) => {
+        const img = imgRefs.current[i];
+        const reveal = revealRefs.current[i];
+
+        // Entrance: the card lifts in with a slight 3D tilt while a solid
+        // panel wipes away to reveal the image underneath.
+        gsap.timeline({
+          scrollTrigger: { trigger: card, start: 'top 88%', end: 'top 42%', scrub: 0.6 },
+        })
+          .fromTo(card, { opacity: 0, y: 46, rotateX: 8 }, { opacity: 1, y: 0, rotateX: 0, ease: 'none' }, 0)
+          .fromTo(reveal, { scaleY: 1 }, { scaleY: 0, ease: 'none' }, 0.08);
+      });
+
+      // Depth: images drift at slightly different speeds as the row passes
+      // through the viewport — alternating amounts, not alternating
+      // direction, so the row still reads as one coherent plane.
+      const mm = gsap.matchMedia();
+      mm.add({ isDesktop: MQ.desktop, isTablet: MQ.tablet }, () => {
+        cards.forEach((card, i) => {
+          const img = imgRefs.current[i];
+          if (!img) return;
+          const travel = i % 2 === 0 ? 12 : 7;
+          gsap.fromTo(
+            img,
+            { yPercent: -travel },
+            {
+              yPercent: travel,
+              ease: 'none',
+              scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: true },
+            }
+          );
+        });
+      });
+
+      return () => mm.revert();
+    }, rowRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <section className="category-grid">
       <div className="container">
-        <motion.div
-          className="category-grid__head"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.6 }}
-        >
-          <span className="eyebrow">Shop by category</span>
-          <h2>Find your fit</h2>
-        </motion.div>
+        <div className="category-grid__head">
+          <SplitHeading eyebrow="Shop by category">Find your fit</SplitHeading>
+        </div>
 
-        <div className="category-grid__row">
+        <div className="category-grid__row" ref={rowRef}>
           {CATEGORY_CARDS.map((c, i) => (
-            <motion.div
+            <Link
+              to={`/shop?category=${encodeURIComponent(c.category)}`}
+              className="category-card"
               key={c.label}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.55, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              ref={(el) => (cardRefs.current[i] = el)}
             >
-              <Link to={`/shop?category=${encodeURIComponent(c.category)}`} className="category-card">
+              <div className="category-card__parallax" ref={(el) => (imgRefs.current[i] = el)}>
                 <ProductImage src={`https://images.unsplash.com/${c.image}?w=700&q=80&auto=format&fit=crop`} alt={c.label} />
-                <div className="category-card__overlay" />
-                <span className="category-card__label">{c.label}</span>
-              </Link>
-            </motion.div>
+              </div>
+              <span className="category-card__reveal" ref={(el) => (revealRefs.current[i] = el)} aria-hidden="true" />
+              <div className="category-card__overlay" />
+              <span className="category-card__label">{c.label}</span>
+            </Link>
           ))}
         </div>
       </div>

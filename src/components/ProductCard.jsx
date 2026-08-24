@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Eye, Heart, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductImage from './ProductImage.jsx';
@@ -9,7 +10,7 @@ import { useQuickView } from '../context/QuickViewContext.jsx';
 import { formatPrice, discountPercent } from '../utils/format.js';
 import './ProductCard.css';
 
-export default function ProductCard({ product }) {
+function ProductCard({ product }) {
   const { has, toggle } = useWishlist();
   const { addItem } = useCart();
   const { open: openQuickView } = useQuickView();
@@ -95,3 +96,8 @@ export default function ProductCard({ product }) {
     </Link>
   );
 }
+
+// Rendered many-at-a-time across product rails, the shop grid, and related-
+// product lists — memoized so an unrelated re-render of a shared list
+// parent doesn't re-render every card whose own product prop hasn't changed.
+export default memo(ProductCard);

@@ -4,6 +4,7 @@ import Hero from '../sections/Hero.jsx';
 import TrustMarquee from '../sections/TrustMarquee.jsx';
 import CategoryGrid from '../sections/CategoryGrid.jsx';
 import ProductRail from '../components/ProductRail.jsx';
+import HorizontalShowcase from '../components/HorizontalShowcase.jsx';
 import PromoBanner from '../sections/PromoBanner.jsx';
 import WhyChooseUs from '../sections/WhyChooseUs.jsx';
 import Features from '../sections/Features.jsx';
@@ -41,7 +42,7 @@ export default function Home() {
       <Hero />
       <TrustMarquee />
       <CategoryGrid />
-      <ProductRail
+      <HorizontalShowcase
         eyebrow="Curated"
         title="Featured Collection"
         subtitle="Our current lineup of signature pieces."

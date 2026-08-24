@@ -1,11 +1,33 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import SplitHeading from '../components/SplitHeading.jsx';
+import { gsap, prefersReducedMotion } from '../lib/gsapConfig.js';
 import './Newsletter.css';
 
 export default function Newsletter() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const innerRef = useRef(null);
+
+  useLayoutEffect(() => {
+    if (!innerRef.current || prefersReducedMotion()) return undefined;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        innerRef.current,
+        { opacity: 0, y: 24, scale: 0.98 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          ease: 'none',
+          scrollTrigger: { trigger: innerRef.current, start: 'top 90%', end: 'top 60%', scrub: 0.6 },
+        }
+      );
+    }, innerRef);
+
+    return () => ctx.revert();
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -15,16 +37,9 @@ export default function Newsletter() {
 
   return (
     <section className="newsletter">
-      <motion.div
-        className="container newsletter__inner"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.5 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      >
+      <div className="container newsletter__inner" ref={innerRef}>
         <div>
-          <span className="eyebrow">Stay in the loop</span>
-          <h2>Join the community</h2>
+          <SplitHeading eyebrow="Stay in the loop">Join the community</SplitHeading>
           <p>New drops, restocks, and members-only offers — straight to your inbox.</p>
         </div>
 
@@ -46,7 +61,7 @@ export default function Newsletter() {
             </button>
           </form>
         )}
-      </motion.div>
+      </div>
     </section>
   );
 }

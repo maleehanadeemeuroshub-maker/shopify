@@ -1,23 +1,11 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo } from 'react';
+import { useLocalStorageState } from '../hooks/useLocalStorageState.js';
 
 const WishlistContext = createContext(null);
 const STORAGE_KEY = 'genzwears_wishlist';
 
-function readStored() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
 export function WishlistProvider({ children }) {
-  const [ids, setIds] = useState(readStored);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
-  }, [ids]);
+  const [ids, setIds] = useLocalStorageState(STORAGE_KEY, []);
 
   const has = useCallback((id) => ids.includes(id), [ids]);
 

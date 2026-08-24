@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { emailApi } from '../lib/api.js';
 import { getPromoCode } from '../utils/cartMath.js';
+import { useLocalStorageState } from '../hooks/useLocalStorageState.js';
 import { useAuth } from './AuthContext.jsx';
 import { useToast } from './ToastContext.jsx';
 
@@ -16,25 +17,15 @@ function lineId(productId, size, color) {
   return `${productId}__${size ?? 'na'}__${color ?? 'na'}`;
 }
 
-function readStoredCart() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
 export function CartProvider({ children }) {
-  const [items, setItems] = useState(readStoredCart);
+  const [items, setItems] = useLocalStorageState(STORAGE_KEY, []);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // Stored as a raw string (not JSON) for backward compatibility with
+  // already-saved promo codes, so it keeps its own read/write effect
+  // instead of useLocalStorageState (which round-trips through JSON).
   const [promoCode, setPromoCode] = useState(() => localStorage.getItem(PROMO_STORAGE_KEY) || null);
   const { user } = useAuth();
   const { showToast } = useToast();
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
 
   useEffect(() => {
     if (promoCode) localStorage.setItem(PROMO_STORAGE_KEY, promoCode);

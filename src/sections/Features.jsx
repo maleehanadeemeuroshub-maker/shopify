@@ -1,7 +1,8 @@
-import { motion } from 'framer-motion';
+import { useLayoutEffect, useRef } from 'react';
 import { Sparkles, ArrowRight } from 'lucide-react';
 import BorderBeamPanel from '../components/ui/border-beam-panel.tsx';
 import { useModal } from '../context/ModalContext.jsx';
+import { gsap, prefersReducedMotion } from '../lib/gsapConfig.js';
 import './Features.css';
 
 const CARDS = [
@@ -22,46 +23,70 @@ const CARDS = [
   },
 ];
 
-const viewport = { once: true, amount: 0.3 };
-
 export default function Features() {
   const { openAuth } = useModal();
+  const gridRef = useRef(null);
+
+  useLayoutEffect(() => {
+    if (!gridRef.current || prefersReducedMotion()) return undefined;
+
+    const ctx = gsap.context(() => {
+      // The scroll entrance animates the cell wrapper, not .fcard itself —
+      // .fcard keeps its own CSS `:hover` transform untouched by GSAP.
+      gsap.utils.toArray('.fcard-cell', gridRef.current).forEach((cell) => {
+        gsap.fromTo(
+          cell,
+          { opacity: 0, y: 36 },
+          {
+            opacity: 1,
+            y: 0,
+            ease: 'none',
+            scrollTrigger: { trigger: cell, start: 'top 92%', end: 'top 66%', scrub: 0.6 },
+          }
+        );
+      });
+
+      const panel = gridRef.current.querySelector('.side-panel');
+      if (panel) {
+        gsap.fromTo(
+          panel,
+          { opacity: 0, y: 36 },
+          {
+            opacity: 1,
+            y: 0,
+            ease: 'none',
+            scrollTrigger: { trigger: panel, start: 'top 90%', end: 'top 62%', scrub: 0.6 },
+          }
+        );
+      }
+    }, gridRef);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
     <section className="features" id="features">
-      <div className="container features__grid">
+      <div className="container features__grid" ref={gridRef}>
         <div className="features__cards">
-          {CARDS.map((c, i) => (
-            <motion.div
-              className="fcard"
-              key={c.title}
-              initial={{ opacity: 0, y: 36 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={viewport}
-              transition={{ duration: 0.7, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
-              whileHover={{ y: -6 }}
-            >
-              <BorderBeamPanel className="fcard__beam p-0 border-0 bg-transparent" radius={16} thickness={1.6} beams={2} glow>
-                <div className="fcard__img" style={{ backgroundImage: `url(${c.image})` }} />
-                <div className="fcard__text">
-                  <h3>{c.title}</h3>
-                  <p>{c.copy}</p>
-                  <button className="fcard__link" onClick={() => openAuth('signup')} type="button">
-                    Learn more <ArrowRight size={13} />
-                  </button>
-                </div>
-              </BorderBeamPanel>
-            </motion.div>
+          {CARDS.map((c) => (
+            <div className="fcard-cell" key={c.title}>
+              <div className="fcard">
+                <BorderBeamPanel className="fcard__beam p-0 border-0 bg-transparent" radius={16} thickness={1.6} beams={2} glow>
+                  <div className="fcard__img" style={{ backgroundImage: `url(${c.image})` }} />
+                  <div className="fcard__text">
+                    <h3>{c.title}</h3>
+                    <p>{c.copy}</p>
+                    <button className="fcard__link" onClick={() => openAuth('signup')} type="button">
+                      Learn more <ArrowRight size={13} />
+                    </button>
+                  </div>
+                </BorderBeamPanel>
+              </div>
+            </div>
           ))}
         </div>
 
-        <motion.div
-          className="side-panel"
-          initial={{ opacity: 0, y: 36 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={viewport}
-          transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        >
+        <div className="side-panel">
           <div className="eyebrow">Built into every store</div>
           <div className="shoppay-card">
             <div className="shoppay-badge">
@@ -82,7 +107,7 @@ export default function Features() {
               <p>Your commerce-obsessed AI assistant.</p>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

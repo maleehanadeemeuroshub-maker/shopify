@@ -1,0 +1,3 @@
+.split-heading .split-word {
+  will-change: transform, opacity, filter;
+}

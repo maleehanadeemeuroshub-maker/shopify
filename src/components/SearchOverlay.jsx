@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { ArrowRight, Search, SearchX, X } from 'lucide-react';
@@ -24,7 +24,11 @@ export default function SearchOverlay({ open, onClose }) {
   const inputRef = useRef(null);
   const navigate = useNavigate();
 
-  const results = useMemo(() => searchProducts(query), [query]);
+  // The input itself always reflects `query` immediately; only the (more
+  // expensive) results computation is deferred, so typing stays responsive
+  // under load without changing what results eventually render.
+  const deferredQuery = useDeferredValue(query);
+  const results = useMemo(() => searchProducts(deferredQuery), [deferredQuery]);
 
   useEffect(() => {
     if (open) {

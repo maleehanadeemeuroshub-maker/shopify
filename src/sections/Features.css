@@ -16,13 +16,19 @@
   gap: 22px;
 }
 
+.fcard-cell {
+  min-width: 0;
+  will-change: opacity, transform;
+}
+
 .fcard {
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--panel);
-  transition: box-shadow 0.3s ease;
+  transition: transform 0.3s var(--ease-soft), box-shadow 0.3s ease;
 }
 .fcard:hover {
+  transform: translateY(-6px);
   box-shadow: 0 20px 50px -24px rgba(0, 0, 0, 0.6);
 }
 
