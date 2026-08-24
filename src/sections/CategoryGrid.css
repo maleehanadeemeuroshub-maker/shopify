@@ -14,16 +14,29 @@
   letter-spacing: -0.015em;
 }
 
+.category-grid__viewport {
+  width: 100%;
+  overflow: hidden;
+}
+
 .category-grid__row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
   gap: 20px;
+  width: max-content;
+  padding-left: max(40px, calc((100vw - 1360px) / 2 + 40px));
+  padding-right: max(40px, calc((100vw - 1360px) / 2 + 40px));
   perspective: 1400px;
+  will-change: transform;
+}
+
+.category-grid__item {
+  flex: 0 0 clamp(260px, 24vw, 320px);
 }
 
 .category-card {
   position: relative;
   display: block;
+  width: 100%;
   aspect-ratio: 3 / 3.6;
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -73,8 +86,22 @@
   color: var(--ink);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 599px) {
+  /* Below the pin animation's own breakpoint (MQ.mobile in gsapConfig.js),
+     no JS ever drives .category-grid__row's transform — fall back to the
+     original static 2-column grid instead of a hidden-overflow flex track
+     with no way to reach the off-screen cards. */
+  .category-grid__viewport {
+    overflow: visible;
+  }
   .category-grid__row {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
+    width: auto;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .category-grid__item {
+    flex-basis: auto;
   }
 }

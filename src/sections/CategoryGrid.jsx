@@ -15,8 +15,11 @@ const CATEGORY_CARDS = [
 ];
 
 export default function CategoryGrid() {
+  const sectionRef = useRef(null);
+  const viewportRef = useRef(null);
   const rowRef = useRef(null);
   const cardRefs = useRef([]);
+  const itemRefs = useRef([]);
   const imgRefs = useRef([]);
   const revealRefs = useRef([]);
 
@@ -65,6 +68,58 @@ export default function CategoryGrid() {
         });
       });
 
+      // Moved from HorizontalShowcase (the section below): vertical scroll
+      // drives horizontal movement — the row pins while the card track
+      // translates sideways by exactly its own overflow, so scroll distance
+      // maps 1:1 to horizontal pixels. Reverses cleanly on scroll-up. Falls
+      // back to the plain grid's own native flow on mobile (no scroll-jack).
+      mm.add({ isDesktop: MQ.desktop, isTablet: MQ.tablet }, () => {
+        const track = rowRef.current;
+        const viewport = viewportRef.current;
+        if (!track || !viewport) return undefined;
+
+        const getAmount = () => Math.max(0, track.scrollWidth - viewport.offsetWidth);
+
+        const tween = gsap.to(track, {
+          x: () => -getAmount(),
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top top',
+            end: () => `+=${getAmount()}`,
+            scrub: 0.7,
+            pin: true,
+            pinSpacing: true,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        // Each card's wrapper gets its own subtle entrance tied to its
+        // position along the horizontal timeline, not the page's vertical
+        // scroll — targets the wrapper, not the card itself, so it doesn't
+        // fight the card's own opacity/y entrance tween above.
+        itemRefs.current.filter(Boolean).forEach((item) => {
+          gsap.fromTo(
+            item,
+            { opacity: 0.4, scale: 0.94 },
+            {
+              opacity: 1,
+              scale: 1,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: item,
+                containerAnimation: tween,
+                start: 'left 90%',
+                end: 'left 55%',
+                scrub: true,
+              },
+            }
+          );
+        });
+
+        return () => tween.scrollTrigger?.kill();
+      });
+
       return () => mm.revert();
     }, rowRef);
 
@@ -72,27 +127,30 @@ export default function CategoryGrid() {
   }, []);
 
   return (
-    <section className="category-grid">
+    <section className="category-grid" ref={sectionRef}>
       <div className="container">
         <div className="category-grid__head">
           <SplitHeading eyebrow="Shop by category">Find your fit</SplitHeading>
         </div>
+      </div>
 
+      <div className="category-grid__viewport" ref={viewportRef}>
         <div className="category-grid__row" ref={rowRef}>
           {CATEGORY_CARDS.map((c, i) => (
-            <Link
-              to={`/shop?category=${encodeURIComponent(c.category)}`}
-              className="category-card"
-              key={c.label}
-              ref={(el) => (cardRefs.current[i] = el)}
-            >
-              <div className="category-card__parallax" ref={(el) => (imgRefs.current[i] = el)}>
-                <ProductImage src={`https://images.unsplash.com/${c.image}?w=700&q=80&auto=format&fit=crop`} alt={c.label} />
-              </div>
-              <span className="category-card__reveal" ref={(el) => (revealRefs.current[i] = el)} aria-hidden="true" />
-              <div className="category-card__overlay" />
-              <span className="category-card__label">{c.label}</span>
-            </Link>
+            <div className="category-grid__item" key={c.label} ref={(el) => (itemRefs.current[i] = el)}>
+              <Link
+                to={`/shop?category=${encodeURIComponent(c.category)}`}
+                className="category-card"
+                ref={(el) => (cardRefs.current[i] = el)}
+              >
+                <div className="category-card__parallax" ref={(el) => (imgRefs.current[i] = el)}>
+                  <ProductImage src={`https://images.unsplash.com/${c.image}?w=700&q=80&auto=format&fit=crop`} alt={c.label} />
+                </div>
+                <span className="category-card__reveal" ref={(el) => (revealRefs.current[i] = el)} aria-hidden="true" />
+                <div className="category-card__overlay" />
+                <span className="category-card__label">{c.label}</span>
+              </Link>
+            </div>
           ))}
         </div>
       </div>
