@@ -3,7 +3,9 @@ import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import BackgroundVideo from '../components/BackgroundVideo.jsx';
 import MagneticButton from '../components/MagneticButton.jsx';
-import { gsap, prefersReducedMotion, MQ } from '../lib/gsapConfig.js';
+import ErrorBoundary from '../components/ErrorBoundary.jsx';
+import { useTheme } from '../context/ThemeContext.jsx';
+import { gsap } from '../lib/gsapConfig.js';
 import './Hero.css';
 
 const Scene3D = lazy(() => import('../components/Scene3D.jsx'));
@@ -24,6 +26,7 @@ const STATS = [
 ];
 
 export default function Hero() {
+  const { resolved } = useTheme();
   const [slide, setSlide] = useState(0);
   const rootRef = useRef(null);
   const labelRef = useRef(null);
@@ -32,9 +35,6 @@ export default function Hero() {
   const ctasRef = useRef(null);
   const statsRef = useRef(null);
   const headlineRef = useRef(null);
-  const contentRef = useRef(null);
-  const dotsRef = useRef(null);
-  const fadeRef = useRef(null);
 
   const handleIndexChange = useCallback((i) => setSlide(i), []);
   const navigate = useNavigate();
@@ -63,60 +63,6 @@ export default function Hero() {
     return () => ctx.revert();
   }, []);
 
-  // Cinematic scroll-out: pin the hero for a stretch of scroll while its
-  // content scales/blurs away, the 3D core and video zoom past camera, and a
-  // solid-color veil rises underneath — so the hero doesn't just disappear,
-  // it dissolves into the section behind it. Reversible (scrub, not a
-  // one-shot), and scaled down per breakpoint instead of just shrinking the
-  // desktop version.
-  //
-  // useLayoutEffect (not useEffect) is required here: this creates a
-  // ScrollTrigger with pin:true, which wraps the hero in an extra "spacer"
-  // div behind React's back. If cleanup (ctx.revert(), which unwraps the
-  // spacer) ran in a useEffect cleanup instead, it would fire AFTER React
-  // has already tried to remove the old DOM on route change — by then the
-  // parent it expects is gone, and React throws, breaking navigation away
-  // from Home entirely. useLayoutEffect cleanup runs synchronously before
-  // that removal.
-  useLayoutEffect(() => {
-    if (prefersReducedMotion()) return undefined;
-
-    const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
-
-      mm.add(
-        { isDesktop: MQ.desktop, isTablet: MQ.tablet },
-        (context) => {
-          const { isDesktop } = context.conditions;
-
-          const tl = gsap.timeline({
-            scrollTrigger: {
-              trigger: rootRef.current,
-              start: 'top top',
-              end: isDesktop ? '+=100%' : '+=60%',
-              scrub: 0.8,
-              pin: true,
-              pinSpacing: true,
-            },
-          });
-
-          tl.to(contentRef.current, { yPercent: -18, scale: 0.92, filter: 'blur(3px)', ease: 'none' }, 0)
-            .to(contentRef.current, { opacity: 0, ease: 'none' }, 0.15)
-            .to('.hero__scene-wrap', { scale: isDesktop ? 1.35 : 1.15, opacity: 0, ease: 'none' }, 0)
-            .to('.bg-video', { scale: 1.18, opacity: 0.5, ease: 'none' }, 0)
-            .to(dotsRef.current, { opacity: 0, ease: 'none' }, 0)
-            .to(fadeRef.current, { opacity: 1, ease: 'none' }, 0.35);
-
-          return () => tl.scrollTrigger?.kill();
-        }
-      );
-
-      return () => mm.revert();
-    }, rootRef);
-
-    return () => ctx.revert();
-  }, []);
-
   // headline crossfade on slide change
   useEffect(() => {
     if (!headlineRef.current) return;
@@ -130,20 +76,22 @@ export default function Hero() {
   return (
     <section className="hero" id="top" ref={rootRef}>
       <div className="hero__atmosphere" aria-hidden="true" />
-      {/* Scene3D mounts asynchronously behind Suspense — this wrapper is
-          always in the DOM at mount, so the scroll-out timeline (built in an
-          effect that can run before the lazy chunk resolves) always has a
-          real element to target, and stays in sync however long the 3D
-          scene takes to load. */}
-      <div className="hero__scene-wrap">
-        <Suspense fallback={null}>
-          <Scene3D />
-        </Suspense>
-      </div>
+      {resolved === 'dark' && (
+        <div className="hero__scene-wrap">
+          {/* Silent boundary: this mounts/unmounts live on every theme
+              switch now, not just page load — a WebGL teardown hiccup here
+              is a decorative-effect problem, not a reason to blank the
+              whole page the way an uncaught error otherwise would. */}
+          <ErrorBoundary fallback={null}>
+            <Suspense fallback={null}>
+              <Scene3D />
+            </Suspense>
+          </ErrorBoundary>
+        </div>
+      )}
       <BackgroundVideo onIndexChange={handleIndexChange} />
-      <div className="hero__fade" ref={fadeRef} aria-hidden="true" />
 
-      <div className="hero__content" ref={contentRef}>
+      <div className="hero__content">
         <div className="eyebrow" ref={labelRef}>
           Spring &apos;26 Collection
         </div>
@@ -186,7 +134,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="hero__dots" ref={dotsRef}>
+      <div className="hero__dots">
         {HEADLINES.map((_, i) => (
           <span key={i} className={i === slide ? 'active' : ''} />
         ))}

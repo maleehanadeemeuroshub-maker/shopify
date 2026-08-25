@@ -14,8 +14,8 @@ import FrequentlyBoughtTogether from '../components/FrequentlyBoughtTogether.jsx
 import { ColorSelector, SizeSelector, QuantitySelector } from '../components/ProductSelectors.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { useWishlist } from '../context/WishlistContext.jsx';
+import { useProducts } from '../context/ProductsContext.jsx';
 import { useProductReviews } from '../hooks/useProductReviews.js';
-import { getProductById, getRelatedProducts } from '../data/products.js';
 import { formatPrice, discountPercent } from '../utils/format.js';
 import { recordView, getRecentlyViewedIds } from '../utils/recentlyViewed.js';
 import { getViewerCount, getSoldTodayCount } from '../utils/socialProof.js';
@@ -24,6 +24,7 @@ import './ProductDetail.css';
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { getProductById, getRelatedProducts } = useProducts();
   const product = getProductById(id);
 
   const { addItem, closeDrawer } = useCart();

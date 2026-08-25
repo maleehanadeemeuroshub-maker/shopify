@@ -1,19 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { emailApi } from '../lib/api.js';
+import { authApi } from '../lib/api.js';
 import { useToast } from './ToastContext.jsx';
 
 const AuthContext = createContext(null);
-
-const ACCOUNTS_KEY = 'genzwears_accounts';
-const SESSION_KEY = 'genzwears_session';
-
-function readAccounts() {
-  try {
-    return JSON.parse(localStorage.getItem(ACCOUNTS_KEY)) || [];
-  } catch {
-    return [];
-  }
-}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -21,67 +10,58 @@ export function AuthProvider({ children }) {
   const { showToast } = useToast();
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(SESSION_KEY);
-      if (raw) setUser(JSON.parse(raw));
-    } catch {
-      /* ignore corrupt session */
-    }
-    setReady(true);
+    let cancelled = false;
+    authApi.me().then((res) => {
+      if (!cancelled && res.ok) setUser(res.user);
+      if (!cancelled) setReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const signup = useCallback(
-    ({ name, email, password }) => {
-      const accounts = readAccounts();
-      const exists = accounts.some((a) => a.email.toLowerCase() === email.toLowerCase());
-      if (exists) return { ok: false, error: 'An account with this email already exists.' };
+    async ({ name, email, password }) => {
+      const res = await authApi.signup({ name, email, password });
+      if (!res.ok) return { ok: false, error: res.error };
 
-      const accountRecord = { name, email, password };
-      localStorage.setItem(ACCOUNTS_KEY, JSON.stringify([...accounts, accountRecord]));
-
-      const session = { name, email };
-      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-      setUser(session);
-
-      // Fire-and-forget: a slow/broken email API must never affect signup itself.
-      emailApi.welcome({ name, email });
-      showToast(`Welcome, ${name.split(' ')[0]}! We've sent a confirmation email.`);
-
+      setUser(res.user);
+      showToast(`Welcome, ${res.user.name.split(' ')[0]}! We've sent a confirmation email.`);
       return { ok: true };
     },
     [showToast]
   );
 
   const login = useCallback(
-    ({ email, password }) => {
-      const accounts = readAccounts();
-      const match = accounts.find((a) => a.email.toLowerCase() === email.toLowerCase());
-      if (!match || match.password !== password) {
-        return { ok: false, error: 'Invalid email or password.' };
-      }
-      const session = { name: match.name, email: match.email };
-      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-      setUser(session);
+    async ({ email, password }) => {
+      const res = await authApi.login({ email, password });
+      if (!res.ok) return { ok: false, error: res.error };
 
-      emailApi.login({
-        name: match.name,
-        email: match.email,
-        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-        timestamp: Date.now(),
-      });
+      setUser(res.user);
       showToast('Login successful. A confirmation email has been sent.');
-
       return { ok: true };
     },
     [showToast]
   );
 
   const logout = useCallback(() => {
-    localStorage.removeItem(SESSION_KEY);
     setUser(null);
+    authApi.logout();
   }, []);
 
-  const value = useMemo(() => ({ user, ready, login, signup, logout }), [user, ready, login, signup, logout]);
+  const becomeSeller = useCallback(async () => {
+    const res = await authApi.becomeSeller();
+    if (!res.ok) return { ok: false, error: res.error };
+
+    setUser(res.user);
+    showToast("You're now a seller! Add your first product from the seller dashboard.");
+    return { ok: true };
+  }, [showToast]);
+
+  const value = useMemo(
+    () => ({ user, ready, login, signup, logout, becomeSeller }),
+    [user, ready, login, signup, logout, becomeSeller]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

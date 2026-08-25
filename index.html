@@ -3,13 +3,101 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  // Applies the saved/system theme before first paint, so the page never
+  // flashes the wrong theme while React boots.
+  (function () {
+    try {
+      var stored = localStorage.getItem('gz_theme');
+      var theme = stored === 'light' || stored === 'dark'
+        ? stored
+        : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.setAttribute('data-theme', theme);
+    } catch (e) {}
+  })();
+</script>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>GENZ-WEARS — Be the next store they line up for</title>
+<style>
+  /* Self-contained (no dependency on the app's CSS, which only loads once
+     the JS module graph executes) — covers the boot gap between first
+     paint and React mounting. Literal colors, not var(), for the same
+     reason; kept in sync by hand with the light/dark tokens in
+     src/styles/index.css. Removed by App.jsx once mounted. */
+  #app-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    background: #07090a;
+    transition: opacity 0.5s ease;
+  }
+  html[data-theme='light'] #app-loader {
+    background: #f6f6f3;
+  }
+  #app-loader.app-loader--done {
+    opacity: 0;
+    pointer-events: none;
+  }
+  #app-loader svg {
+    width: 44px;
+    height: 44px;
+    animation: app-loader-pulse 1.6s ease-in-out infinite;
+  }
+  #app-loader path {
+    fill: #f3f5f2;
+  }
+  html[data-theme='light'] #app-loader path {
+    fill: #12160f;
+  }
+  #app-loader .app-loader__bar {
+    width: 120px;
+    height: 2px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+  }
+  html[data-theme='light'] #app-loader .app-loader__bar {
+    background: rgba(10, 14, 12, 0.1);
+  }
+  #app-loader .app-loader__bar span {
+    display: block;
+    width: 40%;
+    height: 100%;
+    background: #95ff8a;
+    animation: app-loader-sweep 1.1s ease-in-out infinite;
+  }
+  @keyframes app-loader-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(0.94); }
+  }
+  @keyframes app-loader-sweep {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #app-loader svg { animation: none; }
+    #app-loader .app-loader__bar span { animation: none; width: 100%; }
+  }
+</style>
 </head>
 <body>
+<div id="app-loader" aria-hidden="true">
+  <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M100 12C140 12 180 45 180 92C180 130 155 152 128 168C128 168 130 140 118 118C118 118 148 108 148 78C148 50 126 30 100 30L100 12Z" />
+    <path d="M100 12C60 12 20 45 20 92C20 130 45 152 72 168C72 168 70 140 82 118C82 118 52 108 52 78C52 50 74 30 100 30L100 12Z" />
+    <path d="M40 96L100 62L160 96L136 96L100 76L64 96Z" />
+    <path d="M62 96C62 96 72 150 100 178C128 150 138 96 138 96L118 96C118 96 112 130 100 148C88 130 82 96 82 96Z" />
+  </svg>
+  <div class="app-loader__bar"><span></span></div>
+</div>
 <div id="root"></div>
 <script type="module" src="/src/main.jsx"></script>
 </body>

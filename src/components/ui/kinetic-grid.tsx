@@ -26,7 +26,10 @@ const MAX_WARP = 24;
 const DOT_SPACING = 28;
 const LERP_SPEED = 0.08;
 
-const LINE_BASE = { r: 255, g: 255, b: 255, a: 0.13 };
+// Light-theme grid: dark hairlines/dots at rest on a near-white base,
+// matching this project's light theme tokens (src/styles/index.css —
+// --bg: #f7f7f6, --surface-rgb: 20, 20, 22).
+const LINE_BASE = { r: 20, g: 20, b: 22, a: 0.12 };
 const NODE_BASE_RADIUS = 1.8;
 const NODE_ACTIVE_RADIUS = 3.2;
 
@@ -154,18 +157,18 @@ export default function KineticGrid({
 
       const theme = {
         default: {
-          bg: "#161618",
-          lineActive: { r: 74, g: 158, b: 255, a: 0.9 },
-          nodeActive: { r: 74, g: 158, b: 255, a: 1.0 },
-          glow: "74,158,255",
-          ripple: "100,180,255",
+          bg: "#f7f7f6",
+          lineActive: { r: 22, g: 130, b: 60, a: 0.9 },
+          nodeActive: { r: 22, g: 130, b: 60, a: 1.0 },
+          glow: "22,130,60",
+          ripple: "22,163,74",
         },
         monochrome: {
-          bg: "#000000",
-          lineActive: { r: 255, g: 255, b: 255, a: 0.9 },
-          nodeActive: { r: 255, g: 255, b: 255, a: 1.0 },
-          glow: "255,255,255",
-          ripple: "255,255,255",
+          bg: "#ffffff",
+          lineActive: { r: 20, g: 20, b: 22, a: 0.9 },
+          nodeActive: { r: 20, g: 20, b: 22, a: 1.0 },
+          glow: "20,20,22",
+          ripple: "20,20,22",
         },
       }[globalColor ?? "default"];
 
@@ -176,7 +179,7 @@ export default function KineticGrid({
       ctx.fillRect(0, 0, W, H);
 
       // Static background dot texture
-      ctx.fillStyle = "rgba(255,255,255,0.05)";
+      ctx.fillStyle = "rgba(20,20,22,0.06)";
       for (let x = DOT_SPACING / 2; x < W; x += DOT_SPACING) {
         for (let y = DOT_SPACING / 2; y < H; y += DOT_SPACING) {
           ctx.beginPath();
@@ -286,7 +289,7 @@ export default function KineticGrid({
           ctx.beginPath();
           ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
           ctx.fillStyle = lerpColor(
-            { r: 255, g: 255, b: 255, a: 0.2 },
+            { r: 20, g: 20, b: 22, a: 0.22 },
             theme.nodeActive,
             t,
           );
@@ -379,7 +382,7 @@ export default function KineticGrid({
     <div
       className={cn(
         "relative w-full min-h-screen overflow-hidden",
-        globalColor === "monochrome" ? "bg-[#000000]" : "bg-[#161618]",
+        globalColor === "monochrome" ? "bg-white" : "bg-[#f7f7f6]",
         className,
       )}
     >

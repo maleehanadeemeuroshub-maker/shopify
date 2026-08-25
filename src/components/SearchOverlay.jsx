@@ -4,22 +4,25 @@ import { createPortal } from 'react-dom';
 import { ArrowRight, Search, SearchX, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ProductImage from './ProductImage.jsx';
-import { PRODUCTS } from '../data/products.js';
+import { useProducts } from '../context/ProductsContext.jsx';
 import { formatPrice } from '../utils/format.js';
 import './SearchOverlay.css';
 
-function searchProducts(query) {
+function searchProducts(products, query) {
   const q = query.trim().toLowerCase();
   if (!q) return [];
-  return PRODUCTS.filter((p) => {
-    const haystack = [p.name, p.category, p.subcategory, p.description, p.shortDescription, ...(p.tags ?? [])]
-      .join(' ')
-      .toLowerCase();
-    return haystack.includes(q);
-  }).slice(0, 6);
+  return products
+    .filter((p) => {
+      const haystack = [p.name, p.category, p.subcategory, p.description, p.shortDescription, ...(p.tags ?? [])]
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(q);
+    })
+    .slice(0, 6);
 }
 
 export default function SearchOverlay({ open, onClose }) {
+  const { products } = useProducts();
   const [query, setQuery] = useState('');
   const inputRef = useRef(null);
   const navigate = useNavigate();
@@ -28,7 +31,7 @@ export default function SearchOverlay({ open, onClose }) {
   // expensive) results computation is deferred, so typing stays responsive
   // under load without changing what results eventually render.
   const deferredQuery = useDeferredValue(query);
-  const results = useMemo(() => searchProducts(deferredQuery), [deferredQuery]);
+  const results = useMemo(() => searchProducts(products, deferredQuery), [products, deferredQuery]);
 
   useEffect(() => {
     if (open) {

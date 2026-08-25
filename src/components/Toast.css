@@ -19,7 +19,7 @@
   max-width: min(420px, 88vw);
   padding: 13px 16px;
   border-radius: var(--radius-pill);
-  background: rgba(15, 19, 17, 0.96);
+  background: rgba(var(--bg-rgb), 0.96);
   backdrop-filter: blur(14px);
   border: 1px solid var(--panel-border);
   box-shadow: 0 20px 50px -18px rgba(0, 0, 0, 0.6);

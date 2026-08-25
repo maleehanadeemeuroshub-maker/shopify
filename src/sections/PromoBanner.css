@@ -4,9 +4,15 @@
   margin: 70px 0;
   padding: 80px 0;
   background: linear-gradient(135deg, #0f1a13 0%, #0a0d0b 60%, #120c1e 100%);
-  border-top: 1px solid var(--panel-border);
-  border-bottom: 1px solid var(--panel-border);
+  border-top: 1px solid rgba(var(--surface-rgb), 0.08);
+  border-bottom: 1px solid rgba(var(--surface-rgb), 0.08);
   will-change: transform, clip-path;
+}
+/* This section's dark gradient is bespoke art, not built from the shared
+   tokens (unlike the rest of the site) — it needs its own explicit light
+   counterpart rather than a var() swap. */
+:root[data-theme='light'] .promo-banner {
+  background: linear-gradient(135deg, #eaf7ee 0%, #fbfbfa 60%, #f2edfa 100%);
 }
 
 .promo-banner__glow {

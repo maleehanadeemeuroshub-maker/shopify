@@ -3,14 +3,23 @@ import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductCard from './ProductCard.jsx';
 import SplitHeading from './SplitHeading.jsx';
+import Marquee from './Marquee.jsx';
 import { gsap, prefersReducedMotion } from '../lib/gsapConfig.js';
 import './ProductRail.css';
 
-export default function ProductRail({ eyebrow, title, subtitle, products, viewAllHref = '/shop' }) {
+export default function ProductRail({
+  eyebrow,
+  title,
+  subtitle,
+  products,
+  viewAllHref = '/shop',
+  className = '',
+  marquee = false,
+}) {
   const gridRef = useRef(null);
 
   useLayoutEffect(() => {
-    if (!gridRef.current || prefersReducedMotion()) return undefined;
+    if (marquee || !gridRef.current || prefersReducedMotion()) return undefined;
 
     const ctx = gsap.context(() => {
       const cells = gsap.utils.toArray('.product-rail__cell', gridRef.current);
@@ -30,12 +39,12 @@ export default function ProductRail({ eyebrow, title, subtitle, products, viewAl
     }, gridRef);
 
     return () => ctx.revert();
-  }, [products]);
+  }, [products, marquee]);
 
   if (!products.length) return null;
 
   return (
-    <section className="product-rail">
+    <section className={`product-rail ${className}`}>
       <div className="container">
         <div className="product-rail__head">
           <div>
@@ -48,15 +57,32 @@ export default function ProductRail({ eyebrow, title, subtitle, products, viewAl
             View all <ArrowRight size={15} />
           </Link>
         </div>
+      </div>
 
-        <div className="product-rail__grid" ref={gridRef}>
-          {products.map((product) => (
-            <div className="product-rail__cell" key={product.id}>
+      {marquee ? (
+        <Marquee
+          className="product-rail__marquee"
+          itemClassName="marquee__item--card"
+          speed={38}
+          gap={26}
+          separator={null}
+          items={products.map((product) => (
+            <div className="product-rail__marquee-cell" key={product.id}>
               <ProductCard product={product} />
             </div>
           ))}
+        />
+      ) : (
+        <div className="container">
+          <div className="product-rail__grid" ref={gridRef}>
+            {products.map((product) => (
+              <div className="product-rail__cell" key={product.id}>
+                <ProductCard product={product} />
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }

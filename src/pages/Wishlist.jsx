@@ -3,12 +3,13 @@ import { ArrowRight, Heart } from 'lucide-react';
 import ProductCard from '../components/ProductCard.jsx';
 import MagneticButton from '../components/MagneticButton.jsx';
 import { useWishlist } from '../context/WishlistContext.jsx';
-import { PRODUCTS } from '../data/products.js';
+import { useProducts } from '../context/ProductsContext.jsx';
 import './Wishlist.css';
 
 export default function Wishlist() {
   const { ids } = useWishlist();
-  const products = PRODUCTS.filter((p) => ids.includes(p.id));
+  const { products: allProducts } = useProducts();
+  const products = allProducts.filter((p) => ids.includes(p.id));
 
   if (products.length === 0) {
     return (

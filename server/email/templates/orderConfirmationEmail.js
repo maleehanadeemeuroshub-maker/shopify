@@ -77,7 +77,7 @@ ${paragraph(
 <div style="text-align:center;margin:28px 0 4px;">
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
 <tr>
-<td style="padding:0 6px;">${button('Track Your Order', `${SITE_URL}/account`)}</td>
+<td style="padding:0 6px;">${button('Track Your Order', `${SITE_URL}/account/orders/${encodeURIComponent(order.orderNumber)}`)}</td>
 <td style="padding:0 6px;">${ghostButton('Continue Shopping', `${SITE_URL}/shop`)}</td>
 </tr>
 </table>

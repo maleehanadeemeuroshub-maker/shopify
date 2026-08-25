@@ -8,8 +8,10 @@ import { orderShippedEmail } from './templates/orderShippedEmail.js';
 import { orderDeliveredEmail } from './templates/orderDeliveredEmail.js';
 import { orderCancelledEmail } from './templates/orderCancelledEmail.js';
 import { abandonedCartEmail } from './templates/abandonedCartEmail.js';
+import { passwordResetEmail } from './templates/passwordReset.js';
 
 const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev';
+const SITE_URL = process.env.SITE_URL || 'http://localhost:5173';
 
 let resendClient = null;
 function getClient() {
@@ -83,5 +85,11 @@ export async function sendOrderStatusEmail({ name, email, order, status, trackin
 
 export async function sendAbandonedCartEmail({ name, email, items, cartTotal }) {
   const { subject, html } = abandonedCartEmail({ name, items, cartTotal });
+  return dispatch({ to: email, subject, html });
+}
+
+export async function sendPasswordResetEmail({ name, email, token }) {
+  const resetUrl = `${SITE_URL}/reset-password?token=${encodeURIComponent(token)}`;
+  const { subject, html } = passwordResetEmail({ name, resetUrl });
   return dispatch({ to: email, subject, html });
 }

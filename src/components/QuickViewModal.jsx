@@ -8,13 +8,14 @@ import MagneticButton from './MagneticButton.jsx';
 import { ColorSelector, SizeSelector, QuantitySelector } from './ProductSelectors.jsx';
 import { useQuickView } from '../context/QuickViewContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
-import { getProductById } from '../data/products.js';
+import { useProducts } from '../context/ProductsContext.jsx';
 import { formatPrice, discountPercent } from '../utils/format.js';
 import './QuickViewModal.css';
 
 export default function QuickViewModal() {
   const { productId, close } = useQuickView();
   const { addItem, openDrawer } = useCart();
+  const { getProductById } = useProducts();
 
   // Keep rendering the last-viewed product's content while the modal
   // animates closed, instead of unmounting it the instant productId clears.

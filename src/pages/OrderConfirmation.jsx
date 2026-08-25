@@ -1,43 +1,44 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, Navigate } from 'react-router-dom';
+import { Link, useLocation, useParams, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2, MapPin, Package, Truck } from 'lucide-react';
 import ProductImage from '../components/ProductImage.jsx';
 import MagneticButton from '../components/MagneticButton.jsx';
 import OrderProgress from '../components/OrderProgress.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
+import { ordersApi } from '../lib/api.js';
 import { formatPrice } from '../utils/format.js';
+import { estimateDelivery } from '../utils/orders.js';
 import './OrderConfirmation.css';
 
-function estimateDelivery(delivery, fromDate) {
-  const days = delivery === 'express' ? [1, 2] : [4, 6];
-  const fmt = (d) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-  const start = new Date(fromDate);
-  start.setDate(start.getDate() + days[0]);
-  const end = new Date(fromDate);
-  end.setDate(end.getDate() + days[1]);
-  return `${fmt(start)} – ${fmt(end)}`;
-}
-
-function readLastOrder() {
-  try {
-    const raw = localStorage.getItem('genzwears_last_order');
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
 export default function OrderConfirmation() {
+  const { orderNumber } = useParams();
   const location = useLocation();
-  // Lazy initializer so a hard refresh (no router state) still resolves the
-  // order synchronously on first render, before the redirect check below runs.
-  const [order] = useState(() => location.state?.order ?? readLastOrder());
+  const { user } = useAuth();
+  const [order, setOrder] = useState(location.state?.order ?? null);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  if (!order) return <Navigate to="/shop" replace />;
+  useEffect(() => {
+    // Fresh navigation already has the order via router state — only hit
+    // the API on a hard refresh, where that state is gone.
+    if (location.state?.order) return;
+    let cancelled = false;
+    ordersApi.get(orderNumber).then((res) => {
+      if (cancelled) return;
+      if (res.ok) setOrder(res.order);
+      else setNotFound(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [orderNumber, location.state]);
+
+  if (notFound) return <Navigate to="/shop" replace />;
+  if (!order) return null;
 
   return (
     <div className="confirmation container">
@@ -142,9 +143,15 @@ export default function OrderConfirmation() {
         <MagneticButton as={Link} to="/shop" variant="solid">
           Continue Shopping <ArrowRight size={16} />
         </MagneticButton>
-        <Link to="/account" className="confirmation__account-link">
-          View order in your account
-        </Link>
+        {user ? (
+          <Link to={`/account/orders/${order.orderNumber}`} className="confirmation__account-link">
+            Track this order
+          </Link>
+        ) : (
+          <Link to="/" className="confirmation__account-link">
+            Save this page or your email confirmation to track this order
+          </Link>
+        )}
       </div>
     </div>
   );

@@ -13,7 +13,7 @@ export function orderProcessingEmail({ name, order }) {
 ${paragraph(`Hi ${escapeHtml(name)}, your order is now being prepared.`)}
 ${paragraph(`Order <strong style="color:#f3f5f2;">#${escapeHtml(order.orderNumber)}</strong> is being picked, packed, and readied for shipment. We'll send you tracking details as soon as it's on its way.`)}
 <div style="text-align:center;margin:28px 0 4px;">
-${button('View Order', `${SITE_URL}/account`)}
+${button('View Order', `${SITE_URL}/account/orders/${encodeURIComponent(order.orderNumber)}`)}
 </div>
 `;
 

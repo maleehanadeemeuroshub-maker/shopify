@@ -4,7 +4,7 @@ export function orderShippedEmail({ name, order, tracking }) {
   const subject = `Your Order #${order.orderNumber} Has Shipped 🚚`;
   const carrier = tracking?.carrier || 'Standard Carrier';
   const trackingNumber = tracking?.trackingNumber || 'Not yet assigned';
-  const trackingUrl = tracking?.trackingUrl || `${SITE_URL}/account`;
+  const trackingUrl = tracking?.trackingUrl || `${SITE_URL}/account/orders/${encodeURIComponent(order.orderNumber)}`;
 
   const bodyHtml = `
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:22px;">

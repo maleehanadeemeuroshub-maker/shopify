@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, SlidersHorizontal, X } from 'lucide-react';
 import ProductCard from '../components/ProductCard.jsx';
 import FilterSidebar, { PRICE_BUCKETS } from '../components/FilterSidebar.jsx';
-import { PRODUCTS, SHOP_PILLS, matchesPill } from '../data/products.js';
+import { SHOP_PILLS, matchesPill } from '../data/products.js';
+import { useProducts } from '../context/ProductsContext.jsx';
 import './Shop.css';
 
 const SORT_OPTIONS = [
@@ -38,6 +39,7 @@ function sortProducts(list, sort) {
 }
 
 export default function Shop() {
+  const { products } = useProducts();
   const [searchParams, setSearchParams] = useSearchParams();
   const pill = searchParams.get('category') || 'All';
   const query = searchParams.get('q') || '';
@@ -78,7 +80,7 @@ export default function Shop() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    let list = PRODUCTS.filter((p) => matchesPill(p, pill));
+    let list = products.filter((p) => matchesPill(p, pill));
 
     if (q) {
       list = list.filter((p) =>
@@ -101,7 +103,7 @@ export default function Shop() {
     if (inStockOnly) list = list.filter((p) => p.stock > 0);
 
     return sortProducts(list, sort);
-  }, [pill, query, filters, minRating, inStockOnly, sort]);
+  }, [products, pill, query, filters, minRating, inStockOnly, sort]);
 
   const activeChips = [
     ...filters.categories.map((v) => ({ type: 'categories', value: v, label: v })),

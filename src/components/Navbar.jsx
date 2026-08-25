@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Heart, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import SearchOverlay from './SearchOverlay.jsx';
+import ThemeToggle from './ThemeToggle.jsx';
 import { useModal } from '../context/ModalContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
@@ -124,10 +125,10 @@ export default function Navbar() {
           <Link className="navbar__logo" to="/">
             <span className="navbar__mark">
               <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path fill="#ffffff" d="M100 12C140 12 180 45 180 92C180 130 155 152 128 168C128 168 130 140 118 118C118 118 148 108 148 78C148 50 126 30 100 30L100 12Z" />
-                <path fill="#ffffff" d="M100 12C60 12 20 45 20 92C20 130 45 152 72 168C72 168 70 140 82 118C82 118 52 108 52 78C52 50 74 30 100 30L100 12Z" />
-                <path fill="#ffffff" d="M40 96L100 62L160 96L136 96L100 76L64 96Z" />
-                <path fill="#ffffff" d="M62 96C62 96 72 150 100 178C128 150 138 96 138 96L118 96C118 96 112 130 100 148C88 130 82 96 82 96Z" />
+                <path fill="currentColor" d="M100 12C140 12 180 45 180 92C180 130 155 152 128 168C128 168 130 140 118 118C118 118 148 108 148 78C148 50 126 30 100 30L100 12Z" />
+                <path fill="currentColor" d="M100 12C60 12 20 45 20 92C20 130 45 152 72 168C72 168 70 140 82 118C82 118 52 108 52 78C52 50 74 30 100 30L100 12Z" />
+                <path fill="currentColor" d="M40 96L100 62L160 96L136 96L100 76L64 96Z" />
+                <path fill="currentColor" d="M62 96C62 96 72 150 100 178C128 150 138 96 138 96L118 96C118 96 112 130 100 148C88 130 82 96 82 96Z" />
               </svg>
             </span>
             GENZ-WEARS
@@ -153,6 +154,14 @@ export default function Navbar() {
             <Link className="navitem" to="/why-genzwears">
               Why GENZ
             </Link>
+            <Link className="navitem" to={user?.role === 'seller' || user?.role === 'admin' ? '/seller' : '/sell'}>
+              {user?.role === 'seller' || user?.role === 'admin' ? 'Seller Dashboard' : 'Sell'}
+            </Link>
+            {user?.role === 'admin' && (
+              <Link className="navitem" to="/admin">
+                Admin
+              </Link>
+            )}
           </nav>
 
           <div className="navbar__right">
@@ -164,6 +173,8 @@ export default function Navbar() {
             >
               {mobileNavOpen ? <X size={19} /> : <Menu size={19} />}
             </button>
+
+            <ThemeToggle className="navbar__icon" />
 
             <button type="button" className="navbar__icon" onClick={() => setSearchOpen(true)} aria-label="Search">
               <Search size={18} />
@@ -252,6 +263,17 @@ export default function Navbar() {
                 <Link to="/why-genzwears" onClick={() => setMobileNavOpen(false)}>
                   Why GENZ
                 </Link>
+                <Link
+                  to={user?.role === 'seller' || user?.role === 'admin' ? '/seller' : '/sell'}
+                  onClick={() => setMobileNavOpen(false)}
+                >
+                  {user?.role === 'seller' || user?.role === 'admin' ? 'Seller Dashboard' : 'Sell'}
+                </Link>
+                {user?.role === 'admin' && (
+                  <Link to="/admin" onClick={() => setMobileNavOpen(false)}>
+                    Admin
+                  </Link>
+                )}
                 <Link to={user ? '/account' : '#'} onClick={(e) => {
                   setMobileNavOpen(false);
                   if (!user) { e.preventDefault(); openAuth('login'); }

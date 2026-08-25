@@ -1,4 +1,8 @@
-// Centralized demo product catalog for the GENZ-WEARS practice storefront.
+// Seed catalog for the GENZ-WEARS practice storefront. The real product data
+// now lives in the `products` SQLite table (server/db/index.js) — this file
+// only seeds that table on first run (server/db/seedProducts.js) and is also
+// used as the initial render state in ProductsContext so the storefront never
+// shows a blank/loading state while the live catalog loads.
 // All prices, stock counts, and reviews are fictional demo data.
 // Images are royalty-free Unsplash photography, loosely matched by category —
 // swap the `img()` ids below for real product photography when available.
@@ -786,13 +790,3 @@ export function matchesPill(p, pill) {
   }
 }
 
-export function getProductById(id) {
-  return PRODUCTS.find((p) => p.id === id);
-}
-
-export function getRelatedProducts(product, limit = 4) {
-  return PRODUCTS.filter((p) => p.id !== product.id && p.category === product.category).slice(0, limit);
-}
-
-export const ALL_SIZES = Array.from(new Set(PRODUCTS.flatMap((p) => p.sizes)));
-export const ALL_COLORS_LIST = Array.from(new Set(PRODUCTS.flatMap((p) => p.colors)));

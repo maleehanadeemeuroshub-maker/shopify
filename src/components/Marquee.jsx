@@ -6,20 +6,34 @@ import './Marquee.css';
  * seamless as long as both copies are the same width, which duplicating the
  * exact same markup guarantees.
  */
-export default function Marquee({ items, speed = 28, reverse = false, separator = '•', className = '' }) {
+export default function Marquee({
+  items,
+  speed = 28,
+  reverse = false,
+  separator = '•',
+  gap = 0,
+  className = '',
+  itemClassName = '',
+}) {
   return (
     <div className={`marquee ${className}`}>
       <div
         className={`marquee__track ${reverse ? 'marquee__track--reverse' : ''}`}
-        style={{ animationDuration: `${speed}s` }}
+        style={{ animationDuration: `${speed}s`, gap }}
       >
         {[0, 1].map((rep) => (
           // The second copy is a purely visual duplicate for the seamless loop.
           // `inert` (not just aria-hidden) keeps any interactive items inside it
           // — e.g. <Link> — from becoming invisible keyboard tab-stops.
-          <div className="marquee__group" key={rep} aria-hidden={rep === 1 || undefined} inert={rep === 1 || undefined}>
+          <div
+            className="marquee__group"
+            key={rep}
+            style={{ gap }}
+            aria-hidden={rep === 1 || undefined}
+            inert={rep === 1 || undefined}
+          >
             {items.map((item, i) => (
-              <span className="marquee__item" key={i}>
+              <span className={`marquee__item ${itemClassName}`} key={i}>
                 {item}
                 {separator && <span className="marquee__sep">{separator}</span>}
               </span>

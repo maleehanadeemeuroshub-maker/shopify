@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { Heart, LogOut, MapPin, Package, Truck, User, XCircle } from 'lucide-react';
-import ProductImage from '../components/ProductImage.jsx';
+import { Heart, LogOut, MapPin, Package, User } from 'lucide-react';
 import ProductCard from '../components/ProductCard.jsx';
 import MagneticButton from '../components/MagneticButton.jsx';
-import OrderProgress from '../components/OrderProgress.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useWishlist } from '../context/WishlistContext.jsx';
-import { useToast } from '../context/ToastContext.jsx';
-import { emailApi } from '../lib/api.js';
-import { PRODUCTS } from '../data/products.js';
+import { useProducts } from '../context/ProductsContext.jsx';
+import { ordersApi } from '../lib/api.js';
 import { formatPrice } from '../utils/format.js';
+import { STATUS_META } from '../utils/orders.js';
 import './Account.css';
 
 const TABS = [
@@ -24,74 +22,28 @@ const MOCK_ADDRESSES = [
   { label: 'Home', name: 'Alex Rivera', line: '128 Fulton Street, Apt 4B', city: 'New York, NY 10038', country: 'United States' },
 ];
 
-const STATUS_META = {
-  confirmed: { label: 'Confirmed', color: '#95ff8a' },
-  processing: { label: 'Processing', color: '#facc7a' },
-  shipped: { label: 'Shipped', color: '#7ee0fa' },
-  delivered: { label: 'Delivered', color: '#95ff8a' },
-  cancelled: { label: 'Cancelled', color: '#ff9d9d' },
-};
-
-// Demo/admin-style controls: this practice project has no real order
-// backend, so status transitions are simulated here and drive the same
-// order-status emails a real admin panel would trigger.
-const STATUS_ACTIONS = [
-  { status: 'processing', label: 'Mark Processing', icon: Package },
-  { status: 'shipped', label: 'Mark Shipped', icon: Truck },
-  { status: 'delivered', label: 'Mark Delivered', icon: Package },
-  { status: 'cancelled', label: 'Cancel Order', icon: XCircle },
-];
-
 export default function Account() {
-  const { user, logout } = useAuth();
+  const { user, ready, logout } = useAuth();
   const { ids } = useWishlist();
-  const { showToast } = useToast();
+  const { products } = useProducts();
   const [tab, setTab] = useState('profile');
-  const [lastOrder, setLastOrder] = useState(null);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [orders, setOrders] = useState(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('genzwears_last_order');
-      if (raw) setLastOrder(JSON.parse(raw));
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  const simulateStatus = async (status) => {
-    if (!lastOrder || updatingStatus) return;
-    setUpdatingStatus(true);
-
-    const tracking =
-      status === 'shipped'
-        ? { carrier: 'GENZ Express Logistics', trackingNumber: `GWX${Math.floor(1e8 + Math.random() * 9e8)}` }
-        : undefined;
-
-    const updatedOrder = { ...lastOrder, status };
-    setLastOrder(updatedOrder);
-    localStorage.setItem('genzwears_last_order', JSON.stringify(updatedOrder));
-
-    const result = await emailApi.orderStatus({
-      name: `${lastOrder.customer.firstName} ${lastOrder.customer.lastName}`.trim(),
-      email: lastOrder.customer.email,
-      order: lastOrder,
-      status,
-      tracking,
+    if (!ready || !user) return;
+    let cancelled = false;
+    ordersApi.list().then((res) => {
+      if (!cancelled && res.ok) setOrders(res.orders);
     });
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, user]);
 
-    showToast(
-      result.ok
-        ? `Order marked as ${STATUS_META[status].label.toLowerCase()}. An email has been sent.`
-        : `Order status updated, but the email couldn't be sent.`,
-      { tone: result.ok ? 'success' : 'error' }
-    );
-    setUpdatingStatus(false);
-  };
-
+  if (!ready) return null;
   if (!user) return <Navigate to="/" replace />;
 
-  const wishlistProducts = PRODUCTS.filter((p) => ids.includes(p.id));
+  const wishlistProducts = products.filter((p) => ids.includes(p.id));
 
   return (
     <div className="account container">
@@ -135,67 +87,26 @@ export default function Account() {
           {tab === 'orders' && (
             <div className="account__card">
               <h2>Orders</h2>
-              {lastOrder ? (
-                <div className="account__order">
-                  <div className="account__order-head">
-                    <div>
-                      <strong>{lastOrder.orderNumber}</strong>
-                      <span>{new Date(lastOrder.date).toLocaleDateString()}</span>
-                    </div>
-                    <div className="account__order-head-right">
-                      <span
-                        className="account__status-badge"
-                        style={{
-                          color: STATUS_META[lastOrder.status ?? 'confirmed'].color,
-                          borderColor: `${STATUS_META[lastOrder.status ?? 'confirmed'].color}55`,
-                          background: `${STATUS_META[lastOrder.status ?? 'confirmed'].color}1a`,
-                        }}
-                      >
-                        {STATUS_META[lastOrder.status ?? 'confirmed'].label}
-                      </span>
-                      <span className="account__order-total">{formatPrice(lastOrder.totals.total)}</span>
-                    </div>
-                  </div>
-                  <div className="account__order-tracking">
-                    <OrderProgress status={lastOrder.status ?? 'confirmed'} />
-                  </div>
-                  <div className="account__order-items">
-                    {lastOrder.items.map((line) => (
-                      <div className="account__order-item" key={line.id}>
-                        <div className="account__order-img">
-                          <ProductImage src={line.image} alt={line.name} />
-                        </div>
+              {orders === null ? null : orders.length > 0 ? (
+                <div className="account__order-history">
+                  {orders.map((order) => {
+                    const meta = STATUS_META[order.status] ?? STATUS_META.confirmed;
+                    return (
+                      <Link to={`/account/orders/${order.orderNumber}`} className="account__order-row" key={order.orderNumber}>
                         <div>
-                          <p>{line.name}</p>
-                          <span>Qty {line.qty}</span>
+                          <strong>{order.orderNumber}</strong>
+                          <span>{new Date(order.date).toLocaleDateString()}</span>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                  <Link to="/order-confirmation" className="account__order-link">
-                    View order details
-                  </Link>
-
-                  {lastOrder.status !== 'cancelled' && lastOrder.status !== 'delivered' && (
-                    <div className="account__status-sim">
-                      <p className="account__demo-note">
-                        Demo admin controls — simulate a status change and its email:
-                      </p>
-                      <div className="account__status-actions">
-                        {STATUS_ACTIONS.filter((a) => a.status !== lastOrder.status).map((a) => (
-                          <button
-                            key={a.status}
-                            type="button"
-                            className="account__status-btn"
-                            disabled={updatingStatus}
-                            onClick={() => simulateStatus(a.status)}
-                          >
-                            <a.icon size={14} /> {a.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                        <span
+                          className="account__status-badge"
+                          style={{ color: meta.color, borderColor: `${meta.color}55`, background: `${meta.color}1a` }}
+                        >
+                          {meta.label}
+                        </span>
+                        <span className="account__order-total">{formatPrice(order.totals.total)}</span>
+                      </Link>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="account__empty">

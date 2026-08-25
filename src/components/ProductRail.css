@@ -33,7 +33,7 @@
   font-weight: 600;
   color: var(--ink);
   padding-bottom: 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(var(--surface-rgb), 0.2);
   white-space: nowrap;
   transition: border-color 0.25s ease, color 0.25s ease;
 }
@@ -46,6 +46,13 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 26px;
+}
+
+.product-rail__marquee {
+  padding: 4px 0;
+}
+.product-rail__marquee-cell {
+  width: clamp(220px, 20vw, 280px);
 }
 
 @media (max-width: 1024px) {

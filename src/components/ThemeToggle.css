@@ -1,0 +1,11 @@
+.theme-toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.theme-toggle__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

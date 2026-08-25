@@ -10,6 +10,17 @@
   --green-dim: #6fe07f;
   --violet: #8b6cff;
   --violet-dim: #6a4de0;
+  /* Parametrized "translucent overlay" white — panel fills, hover states,
+     hairline borders throughout the app's UI chrome are written as
+     rgba(var(--surface-rgb), alpha) instead of a literal color, so the same
+     alpha values that read as "subtle light tint on dark" invert cleanly to
+     "subtle dark tint on light" in the light theme below, with zero visual
+     change to the (already-tuned) dark theme. */
+  --surface-rgb: 255, 255, 255;
+  /* RGB-triplet form of --bg, for translucent/blurred glass surfaces
+     (scrolled navbar, dropdown menus) that need alpha over --bg's exact
+     color rather than a plain opaque fill. */
+  --bg-rgb: 7, 9, 10;
   --radius-sm: 10px;
   --radius-md: 16px;
   --radius-lg: 26px;
@@ -19,6 +30,37 @@
   --font-display: 'Space Grotesk', 'Inter', -apple-system, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --container: 1360px;
+}
+
+/* Light theme — applied via [data-theme="light"] on <html>, set by
+   ThemeContext (src/context/ThemeContext.jsx) from the user's saved
+   preference or, by default, their OS setting. Every surface (nav, forms,
+   cards, cart, checkout, account, seller/admin dashboards, and the
+   homepage's marketing sections) fully re-themes; only the category
+   cards' fixed dark image-scrim + light text (a standard photo-overlay
+   pattern used regardless of site theme) and the 3D/WebGL decorative
+   effects (which don't render via CSS at all) stay as-is.
+   Neutral (not green-tinted) ink/surface grays keep the chrome from
+   reading muddy once combined with the green accent; borders sit at a
+   higher opacity than the dark theme's since flat light UIs need more of
+   it to read as separated surfaces rather than a wash of near-white.
+   --green is a vivid, WCAG-accessible-on-white shade (not the neon mint
+   used on dark) — the many pale rgba(149,255,138,x) tint backgrounds used
+   behind it elsewhere stay readable against it, so they're left as-is. */
+:root[data-theme='light'] {
+  --bg: #f7f7f6;
+  --bg-elevated: #ffffff;
+  --panel: rgba(20, 20, 22, 0.045);
+  --panel-border: rgba(20, 20, 22, 0.13);
+  --ink: #16181a;
+  --ink-dim: #3d4245;
+  --ink-faint: #666b6e;
+  --green: #16a34a;
+  --green-dim: #15803d;
+  --violet: #6d4ce0;
+  --violet-dim: #5638c9;
+  --bg-rgb: 247, 247, 246;
+  --surface-rgb: 20, 20, 22;
 }
 
 * {
@@ -33,6 +75,17 @@ html {
      this is the root stacking context's own background, painted before any
      descendant. It's the dark fallback if WebGL fails or before it loads. */
   background: var(--bg);
+  transition: background-color 0.4s ease;
+}
+
+/* Smooths the dark/light toggle for any element that doesn't already
+   declare its own transition (most interactive elements do, for their
+   hover states, and — being more specific than this universal rule —
+   simply keep using that timing instead of this one). */
+*,
+*::before,
+*::after {
+  transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease;
 }
 
 body {
@@ -85,7 +138,28 @@ video {
 }
 
 .route-fallback {
-  min-height: 100vh;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.route-fallback__spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(var(--surface-rgb), 0.12);
+  border-top-color: var(--green);
+  animation: route-fallback-spin 0.8s linear infinite;
+}
+@keyframes route-fallback-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-fallback__spinner {
+    animation: none;
+  }
 }
 
 .route-error {
@@ -103,12 +177,14 @@ video {
   padding: 10px 22px;
   border-radius: var(--radius-pill);
   background: var(--ink);
-  color: #0a0d0b;
+  color: var(--bg);
   font-weight: 700;
   font-size: 14px;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 .route-error button:hover {
   background: var(--green);
+  color: #0a0d0b;
 }
 
 .container {
@@ -145,7 +221,7 @@ video {
   background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1c211e;
+  background: rgba(var(--surface-rgb), 0.14);
   border-radius: 10px;
 }
 

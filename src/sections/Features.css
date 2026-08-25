@@ -1,7 +1,7 @@
 .features {
   position: relative;
   padding: 110px 0 130px;
-  background: linear-gradient(180deg, #07090a 0%, #0a0d0b 100%);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-elevated) 100%);
 }
 
 .features__grid {
@@ -24,7 +24,7 @@
 .fcard {
   border-radius: var(--radius-md);
   overflow: hidden;
-  background: var(--panel);
+  background: rgba(var(--surface-rgb), 0.035);
   transition: transform 0.3s var(--ease-soft), box-shadow 0.3s ease;
 }
 .fcard:hover {
@@ -84,6 +84,8 @@
   width: 160px;
   height: 160px;
   border-radius: 50%;
+  /* Always a light sheen on the fixed-purple card above, not page chrome —
+     deliberately not the theme-relative surface tint used elsewhere. */
   background: radial-gradient(circle, rgba(255, 255, 255, 0.35), transparent 70%);
 }
 .shoppay-badge {
@@ -119,8 +121,8 @@
 }
 
 .mini-feature {
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
+  background: rgba(var(--surface-rgb), 0.035);
+  border: 1px solid rgba(var(--surface-rgb), 0.08);
   border-radius: var(--radius-md);
   padding: 20px;
   display: flex;

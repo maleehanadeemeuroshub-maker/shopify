@@ -4,6 +4,7 @@ import Modal from './Modal.jsx';
 import MagneticButton from './MagneticButton.jsx';
 import { useModal } from '../context/ModalContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { authApi } from '../lib/api.js';
 import './AuthModal.css';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -21,6 +22,9 @@ export default function AuthModal() {
   const [confirm, setConfirm] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotSubmitting, setForgotSubmitting] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -29,6 +33,7 @@ export default function AuthModal() {
     setError('');
     setSuccess('');
     setForgotOpen(false);
+    setForgotSent(false);
   }, [isOpen, mode]);
 
   const resetFields = () => {
@@ -44,7 +49,7 @@ export default function AuthModal() {
     window.setTimeout(resetFields, 200);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -57,31 +62,48 @@ export default function AuthModal() {
       return;
     }
 
-    if (mode === 'signup') {
-      if (!name.trim()) {
-        setError('Enter your name.');
-        return;
+    setSubmitting(true);
+    try {
+      if (mode === 'signup') {
+        if (!name.trim()) {
+          setError('Enter your name.');
+          return;
+        }
+        if (password !== confirm) {
+          setError('Passwords do not match.');
+          return;
+        }
+        const res = await signup({ name: name.trim(), email, password });
+        if (!res.ok) {
+          setError(res.error);
+          return;
+        }
+        setSuccess(`Welcome, ${name.trim()}! Your store is ready.`);
+      } else {
+        const res = await login({ email, password });
+        if (!res.ok) {
+          setError(res.error);
+          return;
+        }
+        setSuccess('Welcome back!');
       }
-      if (password !== confirm) {
-        setError('Passwords do not match.');
-        return;
-      }
-      const res = signup({ name: name.trim(), email, password });
-      if (!res.ok) {
-        setError(res.error);
-        return;
-      }
-      setSuccess(`Welcome, ${name.trim()}! Your store is ready.`);
-    } else {
-      const res = login({ email, password });
-      if (!res.ok) {
-        setError(res.error);
-        return;
-      }
-      setSuccess('Welcome back!');
+    } finally {
+      setSubmitting(false);
     }
 
     window.setTimeout(handleClose, 900);
+  };
+
+  const handleForgotPassword = async () => {
+    if (!EMAIL_RE.test(email)) {
+      setError('Enter your account email above first.');
+      return;
+    }
+    setError('');
+    setForgotSubmitting(true);
+    await authApi.forgotPassword({ email });
+    setForgotSubmitting(false);
+    setForgotSent(true);
   };
 
   return (
@@ -175,7 +197,16 @@ export default function AuthModal() {
           )}
           {forgotOpen && (
             <p className="auth-modal__hint">
-              This is a demo store — password resets aren&apos;t wired up to email yet.
+              {forgotSent ? (
+                "If an account exists for that email, we've sent a password reset link."
+              ) : (
+                <>
+                  We&apos;ll email a reset link to the address above.{' '}
+                  <button type="button" onClick={handleForgotPassword} disabled={forgotSubmitting}>
+                    {forgotSubmitting ? 'Sending…' : 'Send reset link'}
+                  </button>
+                </>
+              )}
             </p>
           )}
 
@@ -190,8 +221,8 @@ export default function AuthModal() {
             </p>
           )}
 
-          <MagneticButton type="submit" variant="solid" className="auth-modal__submit">
-            {mode === 'signup' ? 'Create account' : 'Log in'}
+          <MagneticButton type="submit" variant="solid" className="auth-modal__submit" disabled={submitting}>
+            {submitting ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Log in'}
           </MagneticButton>
         </form>
 
@@ -212,8 +243,6 @@ export default function AuthModal() {
             </>
           )}
         </p>
-
-        <p className="auth-modal__disclaimer">Demo authentication — stored locally in your browser only.</p>
       </div>
     </Modal>
   );

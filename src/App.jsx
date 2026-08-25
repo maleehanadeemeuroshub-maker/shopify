@@ -7,6 +7,7 @@ import AuthModal from './components/AuthModal.jsx';
 import CartDrawer from './components/CartDrawer.jsx';
 import QuickViewModal from './components/QuickViewModal.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
+import RequireRole from './components/RequireRole.jsx';
 import Home from './pages/Home.jsx';
 import Footer from './sections/Footer.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
@@ -15,6 +16,8 @@ import { CartProvider } from './context/CartContext.jsx';
 import { WishlistProvider } from './context/WishlistContext.jsx';
 import { QuickViewProvider } from './context/QuickViewContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
+import { ProductsProvider } from './context/ProductsContext.jsx';
+import { ThemeProvider, useTheme } from './context/ThemeContext.jsx';
 import { ScrollTrigger, ScrollSmoother, prefersReducedMotion } from './lib/gsapConfig.js';
 
 const Shop = lazy(() => import('./pages/Shop.jsx'));
@@ -24,9 +27,22 @@ const Wishlist = lazy(() => import('./pages/Wishlist.jsx'));
 const Checkout = lazy(() => import('./pages/Checkout.jsx'));
 const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation.jsx'));
 const Account = lazy(() => import('./pages/Account.jsx'));
+const OrderTracking = lazy(() => import('./pages/OrderTracking.jsx'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword.jsx'));
+const SellerOnboarding = lazy(() => import('./pages/seller/SellerOnboarding.jsx'));
+const SellerDashboard = lazy(() => import('./pages/seller/SellerDashboard.jsx'));
+const SellerProducts = lazy(() => import('./pages/seller/SellerProducts.jsx'));
+const SellerProductForm = lazy(() => import('./pages/seller/SellerProductForm.jsx'));
+const SellerOrders = lazy(() => import('./pages/seller/SellerOrders.jsx'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard.jsx'));
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers.jsx'));
+const AdminProducts = lazy(() => import('./pages/admin/AdminProducts.jsx'));
+const AdminOrders = lazy(() => import('./pages/admin/AdminOrders.jsx'));
+const AdminCategories = lazy(() => import('./pages/admin/AdminCategories.jsx'));
 const WhyGenzWears = lazy(() => import('./pages/WhyGenzWears.jsx'));
 const Enterprise = lazy(() => import('./pages/Enterprise.jsx'));
 const Pricing = lazy(() => import('./pages/Pricing.jsx'));
+const NotFound = lazy(() => import('./pages/NotFound.jsx'));
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -47,8 +63,39 @@ function ScrollToTop() {
   return null;
 }
 
+// CosmicDust paints a fully opaque black WebGL scene — it never lets any
+// CSS background show through, so it can only ever make sense as a dark-
+// theme effect. Not rendering it at all in light mode (rather than trying
+// to reskin it) also skips the WebGL/CDN Three.js load entirely there.
+// Wrapped in its own silent ErrorBoundary: this now mounts/unmounts live on
+// every theme switch (not just page load), and it's a purely decorative
+// background effect — a WebGL teardown hiccup here should never be able to
+// blank the rest of the app the way an uncaught error otherwise would.
+function CosmicDustGate() {
+  const { resolved } = useTheme();
+
+  // Switching themes mounts/unmounts this and Hero's Scene3D, which can
+  // shift layout — let pinned/scrubbed ScrollTriggers elsewhere on the page
+  // recompute against it, same as the route-change refresh in ScrollToTop.
+  useEffect(() => {
+    const id = requestAnimationFrame(() => ScrollTrigger.refresh());
+    return () => cancelAnimationFrame(id);
+  }, [resolved]);
+
+  if (resolved !== 'dark') return null;
+  return (
+    <ErrorBoundary fallback={null}>
+      <CosmicDust />
+    </ErrorBoundary>
+  );
+}
+
 function RouteFallback() {
-  return <div className="route-fallback" aria-hidden="true" />;
+  return (
+    <div className="route-fallback" aria-hidden="true">
+      <span className="route-fallback__spinner" />
+    </div>
+  );
 }
 
 function useSmoothScroll() {
@@ -96,14 +143,27 @@ export default function App() {
   useSmoothScroll();
   const { pathname } = useLocation();
 
+  // The static #app-loader in index.html covers the gap between first
+  // paint and React mounting (which this effect only fires after) — fade
+  // it out and drop it from the DOM now that the real app has taken over.
+  useEffect(() => {
+    const loader = document.getElementById('app-loader');
+    if (!loader) return undefined;
+    loader.classList.add('app-loader--done');
+    const timeout = setTimeout(() => loader.remove(), 550);
+    return () => clearTimeout(timeout);
+  }, []);
+
   return (
+    <ThemeProvider>
+    <ProductsProvider>
     <ToastProvider>
       <AuthProvider>
         <ModalProvider>
           <CartProvider>
             <WishlistProvider>
               <QuickViewProvider>
-                <CosmicDust />
+                <CosmicDustGate />
                 <div className="grain" aria-hidden="true" />
                 <CursorGlow />
                 <ScrollToTop />
@@ -128,11 +188,95 @@ export default function App() {
                             <Route path="/cart" element={<Cart />} />
                             <Route path="/wishlist" element={<Wishlist />} />
                             <Route path="/checkout" element={<Checkout />} />
-                            <Route path="/order-confirmation" element={<OrderConfirmation />} />
+                            <Route path="/order-confirmation/:orderNumber" element={<OrderConfirmation />} />
                             <Route path="/account" element={<Account />} />
+                            <Route path="/account/orders/:orderNumber" element={<OrderTracking />} />
+                            <Route path="/reset-password" element={<ResetPassword />} />
+                            <Route path="/sell" element={<SellerOnboarding />} />
+                            <Route
+                              path="/seller"
+                              element={
+                                <RequireRole roles={['seller', 'admin']} redirectTo="/sell">
+                                  <SellerDashboard />
+                                </RequireRole>
+                              }
+                            />
+                            <Route
+                              path="/seller/products"
+                              element={
+                                <RequireRole roles={['seller', 'admin']} redirectTo="/sell">
+                                  <SellerProducts />
+                                </RequireRole>
+                              }
+                            />
+                            <Route
+                              path="/seller/products/new"
+                              element={
+                                <RequireRole roles={['seller', 'admin']} redirectTo="/sell">
+                                  <SellerProductForm />
+                                </RequireRole>
+                              }
+                            />
+                            <Route
+                              path="/seller/products/:id/edit"
+                              element={
+                                <RequireRole roles={['seller', 'admin']} redirectTo="/sell">
+                                  <SellerProductForm />
+                                </RequireRole>
+                              }
+                            />
+                            <Route
+                              path="/seller/orders"
+                              element={
+                                <RequireRole roles={['seller', 'admin']} redirectTo="/sell">
+                                  <SellerOrders />
+                                </RequireRole>
+                              }
+                            />
+                            <Route
+                              path="/admin"
+                              element={
+                                <RequireRole roles={['admin']}>
+                                  <AdminDashboard />
+                                </RequireRole>
+                              }
+                            />
+                            <Route
+                              path="/admin/users"
+                              element={
+                                <RequireRole roles={['admin']}>
+                                  <AdminUsers />
+                                </RequireRole>
+                              }
+                            />
+                            <Route
+                              path="/admin/products"
+                              element={
+                                <RequireRole roles={['admin']}>
+                                  <AdminProducts />
+                                </RequireRole>
+                              }
+                            />
+                            <Route
+                              path="/admin/orders"
+                              element={
+                                <RequireRole roles={['admin']}>
+                                  <AdminOrders />
+                                </RequireRole>
+                              }
+                            />
+                            <Route
+                              path="/admin/categories"
+                              element={
+                                <RequireRole roles={['admin']}>
+                                  <AdminCategories />
+                                </RequireRole>
+                              }
+                            />
                             <Route path="/why-genzwears" element={<WhyGenzWears />} />
                             <Route path="/enterprise" element={<Enterprise />} />
                             <Route path="/pricing" element={<Pricing />} />
+                            <Route path="*" element={<NotFound />} />
                           </Routes>
                         </Suspense>
                       </ErrorBoundary>
@@ -149,5 +293,7 @@ export default function App() {
         </ModalProvider>
       </AuthProvider>
     </ToastProvider>
+    </ProductsProvider>
+    </ThemeProvider>
   );
 }

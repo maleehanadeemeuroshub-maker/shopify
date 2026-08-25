@@ -1,0 +1,21 @@
+.order-tracking__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  margin-bottom: 18px;
+}
+.order-tracking__back:hover {
+  color: var(--ink);
+}
+
+.order-tracking__layout {
+  margin-top: 22px;
+  margin-bottom: 4px;
+}
+.order-tracking__layout .confirmation__items,
+.order-tracking__layout .confirmation__card {
+  background: rgba(var(--surface-rgb), 0.03);
+}

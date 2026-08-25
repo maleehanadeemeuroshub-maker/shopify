@@ -1,7 +1,7 @@
 .auth-modal__tabs {
   display: flex;
   gap: 4px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(var(--surface-rgb), 0.04);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-pill);
   padding: 4px;
@@ -18,7 +18,7 @@
 }
 .auth-modal__tabs button.active {
   background: var(--ink);
-  color: #0a0d0b;
+  color: var(--bg);
 }
 
 .auth-modal h2 {
@@ -46,7 +46,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--surface-rgb), 0.03);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-sm);
   padding: 13px 14px;
@@ -55,7 +55,7 @@
 }
 .field:focus-within {
   border-color: rgba(149, 255, 138, 0.45);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--surface-rgb), 0.05);
 }
 .field input {
   flex: 1;
@@ -95,11 +95,24 @@
 .auth-modal__hint {
   font-size: 12.5px;
   color: var(--ink-faint);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--surface-rgb), 0.03);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-sm);
   padding: 10px 12px;
   line-height: 1.4;
+}
+.auth-modal__hint button {
+  color: var(--green);
+  font-weight: 600;
+  text-decoration: underline;
+}
+.auth-modal__hint button:hover {
+  color: var(--green-dim);
+}
+.auth-modal__hint button:disabled {
+  opacity: 0.6;
+  cursor: default;
+  text-decoration: none;
 }
 
 .auth-modal__error,

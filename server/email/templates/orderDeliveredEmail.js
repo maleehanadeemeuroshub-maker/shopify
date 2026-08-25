@@ -15,7 +15,7 @@ ${paragraph("Something not right? Reach out to our support team and we'll help s
 <div style="text-align:center;margin:28px 0 4px;">
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
 <tr>
-<td style="padding:0 6px;">${button('View Order', `${SITE_URL}/account`)}</td>
+<td style="padding:0 6px;">${button('View Order', `${SITE_URL}/account/orders/${encodeURIComponent(order.orderNumber)}`)}</td>
 <td style="padding:0 6px;">${ghostButton('Shop Again', `${SITE_URL}/shop`)}</td>
 </tr>
 </table>

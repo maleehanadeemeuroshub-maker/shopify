@@ -33,6 +33,14 @@
   white-space: nowrap;
 }
 
+/* Card content wraps normally and needs its own box, unlike the inline
+   nowrap text items above (brand words, trust badges). */
+.marquee__item--card {
+  display: block;
+  white-space: normal;
+  flex-shrink: 0;
+}
+
 .marquee__sep {
   margin: 0 1.4em;
   opacity: 0.45;

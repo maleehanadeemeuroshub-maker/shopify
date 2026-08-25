@@ -329,12 +329,22 @@ function setupScene(canvas, modules) {
     cancelAnimationFrame(raf);
     cancelAnimationFrame(appearRaf);
     window.removeEventListener('resize', onResize);
-    geometry.dispose();
-    material.dispose();
-    torusComposer.dispose();
-    bloomComposer.dispose();
-    finalComposer.dispose();
-    renderer.dispose();
+    // This now runs on every dark→light theme switch (CosmicDust unmounts
+    // there), not just on page unload — a WebGL context torn down mid-frame
+    // (or already lost) can throw here, and since this fires from a
+    // useEffect cleanup, an uncaught throw propagates as a real React error
+    // that (absent a boundary) blanks the whole app. It's teardown; a
+    // failure here doesn't need to be fatal to anything else.
+    try {
+      geometry.dispose();
+      material.dispose();
+      torusComposer.dispose();
+      bloomComposer.dispose();
+      finalComposer.dispose();
+      renderer.dispose();
+    } catch (err) {
+      console.warn('[CosmicDust] error during teardown (non-fatal):', err);
+    }
   };
 }
 

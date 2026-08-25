@@ -12,11 +12,17 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    console.error('[ErrorBoundary] Uncaught error in route tree:', error, info);
+    console.error('[ErrorBoundary] Uncaught error in subtree:', error, info);
   }
 
   render() {
     if (this.state.hasError) {
+      // `fallback` lets optional/decorative subtrees (a WebGL background
+      // effect, say) disappear silently instead of showing this route-level
+      // "something went wrong, reload" message, which would be a confusing
+      // non-sequitur for something the user never asked to load in the
+      // first place.
+      if (this.props.fallback !== undefined) return this.props.fallback;
       return (
         <div className="route-error" role="alert">
           <p>Something went wrong loading this page.</p>

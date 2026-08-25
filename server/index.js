@@ -1,10 +1,18 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import emailRoutes from './routes/emailRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import productRoutes from './routes/productRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+import { seedProductsIfEmpty } from './db/seedProducts.js';
+
+seedProductsIfEmpty();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT) || 8787;
@@ -17,15 +25,21 @@ const app = express();
 app.use(
   cors({
     origin: [/^http:\/\/localhost:\d+$/, /^http:\/\/127\.0\.0\.1:\d+$/],
+    credentials: true,
   })
 );
 app.use(express.json({ limit: '1mb' }));
+app.use(cookieParser());
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, emailConfigured: Boolean(process.env.RESEND_API_KEY) });
 });
 
 app.use('/api/email', emailRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Serve the production frontend build, if it exists, so `node server/index.js`
 // alone can run the whole app after `npm run build` — no separate static host

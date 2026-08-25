@@ -1,4 +1,5 @@
-import { CATEGORIES, ALL_SIZES, ALL_COLORS_LIST } from '../data/products.js';
+import { CATEGORIES } from '../data/products.js';
+import { useProducts } from '../context/ProductsContext.jsx';
 import './FilterSidebar.css';
 
 export const PRICE_BUCKETS = [
@@ -18,6 +19,7 @@ function FilterGroup({ title, children }) {
 }
 
 export default function FilterSidebar({ filters, toggle, setInStockOnly, setMinRating, className = '' }) {
+  const { allSizes, allColors } = useProducts();
   return (
     <aside className={`filter-sidebar ${className}`}>
       <FilterGroup title="Category">
@@ -40,7 +42,7 @@ export default function FilterSidebar({ filters, toggle, setInStockOnly, setMinR
 
       <FilterGroup title="Size">
         <div className="filter-chip-grid">
-          {ALL_SIZES.map((s) => (
+          {allSizes.map((s) => (
             <button
               key={s}
               type="button"
@@ -55,7 +57,7 @@ export default function FilterSidebar({ filters, toggle, setInStockOnly, setMinR
 
       <FilterGroup title="Color">
         <div className="filter-chip-grid">
-          {ALL_COLORS_LIST.map((c) => (
+          {allColors.map((c) => (
             <button
               key={c}
               type="button"

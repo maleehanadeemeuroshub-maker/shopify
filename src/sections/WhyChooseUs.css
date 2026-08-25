@@ -14,8 +14,8 @@
   gap: 12px;
   padding: 26px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--panel-border);
-  background: var(--panel);
+  border: 1px solid rgba(var(--surface-rgb), 0.08);
+  background: rgba(var(--surface-rgb), 0.035);
 }
 
 .why-us__icon {
