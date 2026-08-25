@@ -3,9 +3,13 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=22.5.0"
+  },
   "scripts": {
     "dev": "vite",
     "server": "node server/index.js",
+    "start": "node server/index.js",
     "dev:all": "concurrently -n vite,api -c blue,green \"npm:dev\" \"npm:server\"",
     "admin:promote": "node server/scripts/promoteAdmin.mjs",
     "build": "vite build",
