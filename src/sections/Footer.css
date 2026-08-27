@@ -104,3 +104,10 @@
     gap: 8px;
   }
 }
+
+@media (max-width: 480px) {
+  .footer__grid {
+    grid-template-columns: 1fr;
+    row-gap: 30px;
+  }
+}
