@@ -4,14 +4,13 @@ import Modal from './Modal.jsx';
 import MagneticButton from './MagneticButton.jsx';
 import { useModal } from '../context/ModalContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { authApi } from '../lib/api.js';
 import './AuthModal.css';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function AuthModal() {
   const { modal, openAuth, closeModal } = useModal();
-  const { login, signup } = useAuth();
+  const { login, signup, forgotPassword } = useAuth();
 
   const isOpen = modal === 'login' || modal === 'signup';
   const mode = modal === 'signup' ? 'signup' : 'login';
@@ -101,7 +100,7 @@ export default function AuthModal() {
     }
     setError('');
     setForgotSubmitting(true);
-    await authApi.forgotPassword({ email });
+    await forgotPassword(email);
     setForgotSubmitting(false);
     setForgotSent(true);
   };

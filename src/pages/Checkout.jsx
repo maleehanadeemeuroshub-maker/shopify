@@ -141,7 +141,7 @@ export default function Checkout() {
     setSubmitting(true);
     const res = await ordersApi.create({
       items,
-      totals,
+      promoCode,
       customer: { email: form.email, firstName: form.firstName, lastName: form.lastName, phone: form.phone },
       shippingAddress: {
         address: form.address,

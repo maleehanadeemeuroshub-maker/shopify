@@ -1,14 +1,15 @@
-// Thin client for the backend API. Every call is fire-and-forget-safe:
-// it never throws, so a slow/broken endpoint can never block or fail the
-// actual signup / login / cart / checkout action that triggered it.
-// `credentials: 'include'` is required so the httpOnly session cookie set by
-// /api/auth/* is sent on every request and stored from every response.
+import { supabase } from './supabaseClient.js';
+
+// Thin client for the handful of backend endpoints that must run server-side
+// (trusted order totals/stock, privileged admin/seller writes, outbound
+// email). Every call is fire-and-forget-safe: it never throws, so a
+// slow/broken endpoint can never block or fail the actual signup / login /
+// cart / checkout action that triggered it.
 async function request(method, path, body, extraHeaders) {
   try {
     const res = await fetch(path, {
       method,
       headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...extraHeaders },
-      credentials: 'include',
       body: body ? JSON.stringify(body) : undefined,
     });
     const data = await res.json().catch(() => ({}));
@@ -23,16 +24,26 @@ async function request(method, path, body, extraHeaders) {
   }
 }
 
-const postJSON = (path, body) => request('POST', path, body);
-const putJSON = (path, body) => request('PUT', path, body);
-const patchJSON = (path, body) => request('PATCH', path, body);
-const deleteJSON = (path) => request('DELETE', path);
+const postJSON = (path, body, extraHeaders) => request('POST', path, body, extraHeaders);
+const putJSON = (path, body, extraHeaders) => request('PUT', path, body, extraHeaders);
+const patchJSON = (path, body, extraHeaders) => request('PATCH', path, body, extraHeaders);
+const deleteJSON = (path, extraHeaders) => request('DELETE', path, undefined, extraHeaders);
 const getJSON = (path, extraHeaders) => request('GET', path, undefined, extraHeaders);
+
+// Every /api/* route that needs to know who's calling reads this bearer
+// token (verified server-side via supabaseAdmin().auth.getUser()) — there's
+// no session cookie anymore, Supabase Auth owns the session.
+async function authHeaders() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
+}
 
 // Guest orders have no account to list them under, so the one-time access
 // token returned at checkout is stashed here (never in the URL) and replayed
 // as a header to re-fetch that single order — e.g. on a confirmation-page
-// refresh. Logged-in orders don't need this; the session cookie is enough.
+// refresh. Logged-in orders don't need this; the bearer token is enough.
 const orderTokenKey = (orderNumber) => `gz_order_token_${orderNumber}`;
 export function saveOrderAccessToken(orderNumber, token) {
   try {
@@ -58,34 +69,33 @@ export const emailApi = {
   abandonedCart: (payload) => postJSON('/api/email/abandoned-cart', payload),
 };
 
+// Signup/login/logout/session are handled directly by supabase-js in
+// AuthContext — this only covers the one auth-adjacent action that still
+// needs a trusted server route (role changes shouldn't be client-writable).
 export const authApi = {
-  signup: (payload) => postJSON('/api/auth/signup', payload),
-  login: (payload) => postJSON('/api/auth/login', payload),
-  logout: () => postJSON('/api/auth/logout'),
-  me: () => getJSON('/api/auth/me'),
-  forgotPassword: (payload) => postJSON('/api/auth/forgot-password', payload),
-  resetPassword: (payload) => postJSON('/api/auth/reset-password', payload),
-  becomeSeller: () => postJSON('/api/auth/become-seller'),
+  becomeSeller: async () => postJSON('/api/auth/become-seller', undefined, await authHeaders()),
 };
 
 export const productsApi = {
   list: () => getJSON('/api/products'),
   get: (id) => getJSON(`/api/products/${encodeURIComponent(id)}`),
-  mine: () => getJSON('/api/products/mine'),
-  create: (payload) => postJSON('/api/products', payload),
-  update: (id, payload) => putJSON(`/api/products/${encodeURIComponent(id)}`, payload),
-  remove: (id) => deleteJSON(`/api/products/${encodeURIComponent(id)}`),
+  mine: async () => getJSON('/api/products/mine', await authHeaders()),
+  create: async (payload) => postJSON('/api/products', payload, await authHeaders()),
+  update: async (id, payload) => putJSON(`/api/products/${encodeURIComponent(id)}`, payload, await authHeaders()),
+  remove: async (id) => deleteJSON(`/api/products/${encodeURIComponent(id)}`, await authHeaders()),
 };
 
 export const ordersApi = {
-  create: (payload) => postJSON('/api/orders', payload),
-  list: () => getJSON('/api/orders'),
-  forSeller: () => getJSON('/api/orders/for-seller'),
-  get: (orderNumber) => {
+  create: async (payload) => postJSON('/api/orders', payload, await authHeaders()),
+  list: async () => getJSON('/api/orders', await authHeaders()),
+  forSeller: async () => getJSON('/api/orders/for-seller', await authHeaders()),
+  get: async (orderNumber) => {
     const token = getOrderAccessToken(orderNumber);
-    return getJSON(`/api/orders/${encodeURIComponent(orderNumber)}`, token ? { 'X-Order-Token': token } : undefined);
+    const headers = { ...(await authHeaders()), ...(token ? { 'X-Order-Token': token } : {}) };
+    return getJSON(`/api/orders/${encodeURIComponent(orderNumber)}`, headers);
   },
-  updateStatus: (orderNumber, payload) => patchJSON(`/api/orders/${encodeURIComponent(orderNumber)}/status`, payload),
+  updateStatus: async (orderNumber, payload) =>
+    patchJSON(`/api/orders/${encodeURIComponent(orderNumber)}/status`, payload, await authHeaders()),
 };
 
 function withQuery(path, params = {}) {
@@ -98,11 +108,12 @@ function withQuery(path, params = {}) {
 }
 
 export const adminApi = {
-  stats: () => getJSON('/api/admin/stats'),
-  categories: () => getJSON('/api/admin/categories'),
-  users: (params) => getJSON(withQuery('/api/admin/users', params)),
-  setUserRole: (id, role) => patchJSON(`/api/admin/users/${id}/role`, { role }),
-  products: (params) => getJSON(withQuery('/api/admin/products', params)),
-  setProductActive: (id, active) => patchJSON(`/api/admin/products/${encodeURIComponent(id)}/active`, { active }),
-  orders: (params) => getJSON(withQuery('/api/admin/orders', params)),
+  stats: async () => getJSON('/api/admin/stats', await authHeaders()),
+  categories: async () => getJSON('/api/admin/categories', await authHeaders()),
+  users: async (params) => getJSON(withQuery('/api/admin/users', params), await authHeaders()),
+  setUserRole: async (id, role) => patchJSON(`/api/admin/users/${id}/role`, { role }, await authHeaders()),
+  products: async (params) => getJSON(withQuery('/api/admin/products', params), await authHeaders()),
+  setProductActive: async (id, active) =>
+    patchJSON(`/api/admin/products/${encodeURIComponent(id)}/active`, { active }, await authHeaders()),
+  orders: async (params) => getJSON(withQuery('/api/admin/orders', params), await authHeaders()),
 };

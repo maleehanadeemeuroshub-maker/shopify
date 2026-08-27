@@ -1,17 +1,22 @@
-import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AlertCircle, CheckCircle2, Eye, EyeOff, Lock, ShieldAlert } from 'lucide-react';
 import MagneticButton from '../components/MagneticButton.jsx';
 import { useModal } from '../context/ModalContext.jsx';
-import { authApi } from '../lib/api.js';
+import { useAuth } from '../context/AuthContext.jsx';
+import { supabase } from '../lib/supabaseClient.js';
 import './ResetPassword.css';
 
+// Supabase's password-reset email links back to this page with a recovery
+// token in the URL; supabase-js (detectSessionInUrl: true) turns that into a
+// short-lived recovery session automatically and fires a PASSWORD_RECOVERY
+// auth event — we just wait for that instead of parsing our own token.
 export default function ResetPassword() {
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get('token') || '';
   const navigate = useNavigate();
   const { openAuth } = useModal();
+  const { updatePassword } = useAuth();
 
+  const [hasRecoverySession, setHasRecoverySession] = useState(null);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -19,13 +24,34 @@ export default function ResetPassword() {
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
 
-  if (!token) {
+  useEffect(() => {
+    let cancelled = false;
+
+    const { data: subscription } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled) return;
+      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) setHasRecoverySession(true);
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!cancelled && hasRecoverySession === null) setHasRecoverySession(Boolean(session));
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (hasRecoverySession === null) return null;
+
+  if (!hasRecoverySession) {
     return (
       <div className="reset-password container">
         <div className="reset-password__card reset-password__card--error">
           <ShieldAlert size={32} strokeWidth={1.3} />
-          <h1>Invalid reset link</h1>
-          <p>This password reset link is missing its token. Request a new one from the login form.</p>
+          <h1>Invalid or expired reset link</h1>
+          <p>This password reset link is invalid or has expired. Request a new one from the login form.</p>
           <MagneticButton
             variant="solid"
             onClick={() => {
@@ -49,7 +75,8 @@ export default function ResetPassword() {
           <p>Your password has been changed. You can now log in with your new password.</p>
           <MagneticButton
             variant="solid"
-            onClick={() => {
+            onClick={async () => {
+              await supabase.auth.signOut();
               navigate('/');
               openAuth('login');
             }}
@@ -75,7 +102,7 @@ export default function ResetPassword() {
     }
 
     setSubmitting(true);
-    const res = await authApi.resetPassword({ token, password });
+    const res = await updatePassword(password);
     setSubmitting(false);
 
     if (!res.ok) {
