@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AlertCircle, CheckCircle2, Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
 import Modal from './Modal.jsx';
 import MagneticButton from './MagneticButton.jsx';
@@ -26,6 +26,11 @@ export default function AuthModal() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  // React's `disabled={submitting}` re-render isn't synchronous — a very
+  // fast double-click/double-Enter could fire handleSubmit twice before
+  // the button visually disables. This ref blocks re-entry immediately,
+  // in the same tick as the first call.
+  const submittingRef = useRef(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -50,6 +55,7 @@ export default function AuthModal() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submittingRef.current) return;
     setError('');
 
     if (!EMAIL_RE.test(email)) {
@@ -61,6 +67,7 @@ export default function AuthModal() {
       return;
     }
 
+    submittingRef.current = true;
     setSubmitting(true);
     try {
       if (mode === 'signup') {
@@ -87,6 +94,7 @@ export default function AuthModal() {
         setSuccess('Welcome back!');
       }
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
 

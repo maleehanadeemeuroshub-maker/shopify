@@ -68,7 +68,15 @@ export function AuthProvider({ children }) {
         password,
         options: { data: { full_name: name } },
       });
-      if (error) return { ok: false, error: error.message };
+      if (error) {
+        // Supabase's own email service (used for the confirmation email)
+        // enforces a low shared rate limit — surface this distinctly so it
+        // doesn't read like a broken signup form.
+        if (error.code === 'over_email_send_rate_limit' || error.status === 429) {
+          return { ok: false, error: 'Too many signup attempts right now — please wait a few minutes and try again.' };
+        }
+        return { ok: false, error: error.message };
+      }
       if (!data.user) return { ok: false, error: 'Could not create account.' };
 
       const profile = await loadProfileWithRetry(data.user.id);
