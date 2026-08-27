@@ -76,28 +76,13 @@ export const authApi = {
   becomeSeller: async () => postJSON('/api/auth/become-seller', undefined, await authHeaders()),
 };
 
-export const productsApi = {
-  list: () => getJSON('/api/products'),
-  get: (id) => getJSON(`/api/products/${encodeURIComponent(id)}`),
-  mine: async () => getJSON('/api/products/mine', await authHeaders()),
-  create: async (payload) => postJSON('/api/products', payload, await authHeaders()),
-  update: async (id, payload) => putJSON(`/api/products/${encodeURIComponent(id)}`, payload, await authHeaders()),
-  remove: async (id) => deleteJSON(`/api/products/${encodeURIComponent(id)}`, await authHeaders()),
-};
-
-export const ordersApi = {
-  create: async (payload) => postJSON('/api/orders', payload, await authHeaders()),
-  list: async () => getJSON('/api/orders', await authHeaders()),
-  forSeller: async () => getJSON('/api/orders/for-seller', await authHeaders()),
-  get: async (orderNumber) => {
-    const token = getOrderAccessToken(orderNumber);
-    const headers = { ...(await authHeaders()), ...(token ? { 'X-Order-Token': token } : {}) };
-    return getJSON(`/api/orders/${encodeURIComponent(orderNumber)}`, headers);
-  },
-  updateStatus: async (orderNumber, payload) =>
-    patchJSON(`/api/orders/${encodeURIComponent(orderNumber)}/status`, payload, await authHeaders()),
-};
-
+// Vercel's plain (non-Next.js) /api file routing only matches a fixed
+// number of literal path segments per file, with no real catch-all — so
+// products/orders/admin are each a single flat function (api/products.js,
+// api/orders.js, api/admin.js) dispatching on the query string instead of
+// nested path segments. Query strings never affect path routing, so this
+// is what actually lets many logical endpoints share one function (staying
+// under the Hobby plan's 12-function cap).
 function withQuery(path, params = {}) {
   const qs = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
@@ -107,13 +92,36 @@ function withQuery(path, params = {}) {
   return query ? `${path}?${query}` : path;
 }
 
+export const productsApi = {
+  list: () => getJSON('/api/products'),
+  get: (id) => getJSON(withQuery('/api/products', { id })),
+  mine: async () => getJSON(withQuery('/api/products', { resource: 'mine' }), await authHeaders()),
+  create: async (payload) => postJSON('/api/products', payload, await authHeaders()),
+  update: async (id, payload) => putJSON(withQuery('/api/products', { id }), payload, await authHeaders()),
+  remove: async (id) => deleteJSON(withQuery('/api/products', { id }), await authHeaders()),
+};
+
+export const ordersApi = {
+  create: async (payload) => postJSON('/api/orders', payload, await authHeaders()),
+  list: async () => getJSON('/api/orders', await authHeaders()),
+  forSeller: async () => getJSON(withQuery('/api/orders', { resource: 'for-seller' }), await authHeaders()),
+  get: async (orderNumber) => {
+    const token = getOrderAccessToken(orderNumber);
+    const headers = { ...(await authHeaders()), ...(token ? { 'X-Order-Token': token } : {}) };
+    return getJSON(withQuery('/api/orders', { orderNumber }), headers);
+  },
+  updateStatus: async (orderNumber, payload) =>
+    patchJSON(withQuery('/api/orders', { orderNumber, action: 'status' }), payload, await authHeaders()),
+};
+
 export const adminApi = {
-  stats: async () => getJSON('/api/admin/stats', await authHeaders()),
-  categories: async () => getJSON('/api/admin/categories', await authHeaders()),
-  users: async (params) => getJSON(withQuery('/api/admin/users', params), await authHeaders()),
-  setUserRole: async (id, role) => patchJSON(`/api/admin/users/${id}/role`, { role }, await authHeaders()),
-  products: async (params) => getJSON(withQuery('/api/admin/products', params), await authHeaders()),
+  stats: async () => getJSON(withQuery('/api/admin', { resource: 'stats' }), await authHeaders()),
+  categories: async () => getJSON(withQuery('/api/admin', { resource: 'categories' }), await authHeaders()),
+  users: async (params) => getJSON(withQuery('/api/admin', { resource: 'users', ...params }), await authHeaders()),
+  setUserRole: async (id, role) =>
+    patchJSON(withQuery('/api/admin', { resource: 'users', id, action: 'role' }), { role }, await authHeaders()),
+  products: async (params) => getJSON(withQuery('/api/admin', { resource: 'products', ...params }), await authHeaders()),
   setProductActive: async (id, active) =>
-    patchJSON(`/api/admin/products/${encodeURIComponent(id)}/active`, { active }, await authHeaders()),
-  orders: async (params) => getJSON(withQuery('/api/admin/orders', params), await authHeaders()),
+    patchJSON(withQuery('/api/admin', { resource: 'products', id, action: 'active' }), { active }, await authHeaders()),
+  orders: async (params) => getJSON(withQuery('/api/admin', { resource: 'orders', ...params }), await authHeaders()),
 };

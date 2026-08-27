@@ -7,6 +7,7 @@
     "node": ">=22.5.0"
   },
   "scripts": {
+    "dev:vercel": "vercel dev",
     "vite": "vite",
     "build": "vite build",
     "preview": "vite preview",
