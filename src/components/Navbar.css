@@ -223,6 +223,15 @@
 .mobile-nav__sale {
   color: var(--green-dim) !important;
 }
+.mobile-nav__theme {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-dim);
+}
 
 @media (max-width: 1024px) {
   .navbar__links {
@@ -254,5 +263,23 @@
   .navbar__icon {
     width: 34px;
     height: 34px;
+  }
+  /* Six icons plus the logo don't fit the top bar on narrow phones (the
+     row overflows off-screen and body's overflow-x:hidden silently clips
+     it, making search/account/wishlist/cart untappable) — the theme
+     toggle is the one non-essential icon, so it moves into the mobile
+     nav dropdown (.mobile-nav__theme below) instead of sitting here. */
+  .navbar__icon--theme {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .navbar__right {
+    gap: 3px;
+  }
+  .navbar__icon {
+    width: 31px;
+    height: 31px;
   }
 }

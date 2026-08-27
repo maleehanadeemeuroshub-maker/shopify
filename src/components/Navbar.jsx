@@ -174,7 +174,7 @@ export default function Navbar() {
               {mobileNavOpen ? <X size={19} /> : <Menu size={19} />}
             </button>
 
-            <ThemeToggle className="navbar__icon" />
+            <ThemeToggle className="navbar__icon navbar__icon--theme" />
 
             <button type="button" className="navbar__icon" onClick={() => setSearchOpen(true)} aria-label="Search">
               <Search size={18} />
@@ -283,6 +283,10 @@ export default function Navbar() {
                 <Link to="/wishlist" onClick={() => setMobileNavOpen(false)}>
                   Wishlist
                 </Link>
+                <div className="mobile-nav__theme">
+                  <span>Theme</span>
+                  <ThemeToggle className="navbar__icon" />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
